@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Secrets / environment variables
+.env
+backend/.env
+backend/atlas-credentials.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode/
+.DS_Store
