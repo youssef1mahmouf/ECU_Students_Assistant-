@@ -1,3 +1,4 @@
+import { api, apiUrl } from '/shared/api.js';
 import { escapeHtml, mount } from '/shared/ui.js';
 
 /**
@@ -163,7 +164,7 @@ function renderFiles(files = [], pathPrefix = []) {
   return `<ul class="library-files">${files.map((file) => {
     const rel = [...pathPrefix, file.name].join('/');
     const canLive = LIVE_EXT.has(file.ext);
-    const href = `/api/public/material-library/file?path=${encodeURIComponent(rel)}`;
+    const href = apiUrl(`/api/public/material-library/file?path=${encodeURIComponent(rel)}`);
     const actions = canLive
       ? `<span class="library-file-actions">
            <a class="btn secondary" href="${href}" download>Download</a>
@@ -190,8 +191,8 @@ export async function renderMaterialLibrary(containerId) {
   if (!host) return null;
 
   try {
-    const response = await fetch('/api/public/material-library', { headers: { Accept: 'application/json' } });
-    data = await response.json();
+    /* Routed through the shared client so a separately hosted frontend still reaches the API. */
+    data = await api.getQuiet('/api/public/material-library');
   } catch {
     mount(`#${containerId}`, '<p class="empty">Could not load the material index.</p>');
     return null;

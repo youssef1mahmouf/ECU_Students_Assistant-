@@ -17,6 +17,19 @@ export class ApiError extends Error {
 const CSRF_COOKIE = 'ga6_csrf_v2';
 let csrfFromServer = '';
 
+/**
+ * Where the API lives. Empty (the default) means same origin, which is how the Express server
+ * serves this frontend today - that path is unchanged. When the frontend is deployed on its own
+ * host, the build writes globalThis.ECU_API_BASE from API_BASE_URL.
+ */
+const API_BASE = String(globalThis.ECU_API_BASE || '').replace(/\/+$/, '');
+const CROSS_ORIGIN = /^https?:\/\//i.test(API_BASE);
+
+/* Exported so link hrefs (downloads, inline viewers) can honour the same base as fetch. */
+export function apiUrl(path) {
+  return `${API_BASE}${path}`;
+}
+
 function csrfToken() {
   if (csrfFromServer) return csrfFromServer;
   let found = '';
@@ -35,9 +48,12 @@ async function request(method, path, body, { retryCsrf = true } = {}) {
 
   let response;
   try {
-    response = await fetch(path, {
+    response = await fetch(apiUrl(path), {
       method,
-      credentials: 'same-origin',
+      /* Same-origin needs 'same-origin'. A separate frontend origin must send the session
+         cookie explicitly, which only works if the API also allows CORS and sets
+         SameSite=None; Secure on the session cookie. */
+      credentials: CROSS_ORIGIN ? 'include' : 'same-origin',
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
     });
