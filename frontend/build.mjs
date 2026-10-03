@@ -80,6 +80,29 @@ globalThis.ECU_API_BASE = ${JSON.stringify(base)};
 `;
 }
 
+/**
+ * Workers Static Assets resolves "/" to <assets-dir>/index.html. This project has no page at the
+ * dist root - the guest home is guest/index.html, which is where the API sends "/" as well - so
+ * without this file every deployment answers 404 on its root URL.
+ */
+function rootRedirect() {
+  return `<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=/guest/">
+<link rel="canonical" href="/guest/">
+<title>ECU Students Assistant</title>
+</head>
+<body>
+<p>Redirecting to <a href="/guest/">the home page</a>...</p>
+<script>location.replace('/guest/');</script>
+</body>
+</html>
+`;
+}
+
 async function main() {
   const files = await walk(ROOT);
   if (!files.some((f) => extname(f) === '.html')) {
@@ -100,6 +123,7 @@ async function main() {
     await cp(file, target);
   }
   await writeFile(join(DIST, 'config.js'), configScript(), 'utf8');
+  await writeFile(join(DIST, 'index.html'), rootRedirect(), 'utf8');
 
   const pages = files.filter((f) => extname(f) === '.html');
   const assets = files.filter((f) => ASSET_EXT.has(extname(f)));
