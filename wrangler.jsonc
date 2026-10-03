@@ -1,5 +1,5 @@
 {
-  "name": "ECU-Students-Assessment",
+  "name": "ecu-students-assessment",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "frontend/dist"
