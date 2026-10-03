@@ -80,6 +80,7 @@ const ADMIN_LINKS = [
   /* "Home" opens the public landing page exactly as a visitor sees it, so it carries the preview
      flag. The dashboard keeps its own slot in the nav and never masquerades as the home page. */
   { href: '/?preview=visitor', key: 'nav.home', id: 'home' },
+  { href: '/admin/dashboard/', key: 'admin.dashboard', id: 'dashboard', cap: 'dashboard' },
   { href: '/admin/groups/', key: 'admin.groups', id: 'groups', cap: 'groupsView' },
   { href: '/admin/accounts/', key: 'admin.accounts', id: 'accounts', cap: 'accountsView' },
   { href: '/admin/subjects/', key: 'nav.subjects', id: 'subjects', cap: 'subjectsManage' },
@@ -112,10 +113,13 @@ function accountLinks({ staff = false } = {}) {
   if (staff) {
     const held = capabilities();
     return [
-      /* Deliberately not labelled "home": it is the public landing page seen as a visitor,
-         so it is named for what it does rather than pretending to be the staff home. */
-      { href: '/?preview=visitor', key: 'action.viewPublicSite' },
-      ...ADMIN_LINKS.filter((link) => !link.cap || held.includes(link.cap)),
+      /* Plain "Home": the public landing page seen as a visitor. It is the one address every
+         role shares, so the brand, the nav and this menu all point at the same place. */
+      { href: '/?preview=visitor', key: 'nav.home' },
+      { href: '/admin/dashboard/', key: 'admin.dashboard' },
+      /* Home and Dashboard are listed once, above, so they are skipped in the spread. */
+      ...ADMIN_LINKS.filter((link) => link.id !== 'home' && link.id !== 'dashboard'
+        && (!link.cap || held.includes(link.cap))),
       { href: '/admin/profile/', key: 'nav.profile' },
     ];
   }
@@ -145,7 +149,8 @@ export function renderHeader({ area = 'user', active = '', preview = false } = {
   const links = preview
     ? (staff ? ADMIN_LINKS : PUBLIC_LINKS)
     : navLinks({ area, staff });
-  const brandHref = staff ? '/admin/dashboard/' : user ? '/user/' : '/';
+  /* The brand is the one address every role shares, so it always opens the landing page. */
+  const brandHref = '/?preview=visitor';
   const roleText = user ? t(`role.${user.role}`) : t('brand.sub');
 
   header.innerHTML = `
@@ -175,9 +180,11 @@ export function renderHeader({ area = 'user', active = '', preview = false } = {
   </div>`;
 
   mountLanguageToggle(document.getElementById('languageToggle'));
-  mountThemeToggle(document.getElementById('themeToggle'));
   wireHeaderBehaviour(header);
   applyI18n(header);
+  /* Painted last: applyI18n rewrites every labelled node in the header, and the theme button
+     must keep its own glyph rather than inheriting the language button's text. */
+  mountThemeToggle(document.getElementById('themeToggle'));
 }
 
 function signInLinks() {

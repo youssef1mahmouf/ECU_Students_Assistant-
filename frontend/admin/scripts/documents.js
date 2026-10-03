@@ -2,7 +2,6 @@ import { bootAdmin } from '/shared/admin-layout.js';
 import { api } from '/shared/api.js';
 import { escapeHtml, mount, showMessage, setBusy, toast } from '/shared/ui.js';
 import { t, language, serverText } from '/shared/i18n.js';
-import { renderMaterialLibrary } from '/shared/material-library.js';
 
 const session = await bootAdmin({ active: 'documents' });
 
@@ -196,6 +195,4 @@ if (session) {
     }
   });
 }
-/* Staff see the same library index as students; it carries no account data. */
-await renderMaterialLibrary('adminLibrary');
 
