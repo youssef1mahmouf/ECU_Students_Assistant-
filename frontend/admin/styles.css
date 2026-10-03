@@ -1,0 +1,115 @@
+/* Admin area. The palette is a single set of tokens so the whole area can be light or dark
+   without touching a component rule: light is the default, and the dark palette is applied
+   only when <html data-theme="dark"> is set by the header toggle. */
+:root {
+  color-scheme: light;
+  --ink: #172522;
+  --muted: #5f6f69;
+  --paper: #f5f7f2;
+  --surface: #ffffff;
+  --line: #dfe7df;
+  --accent: #176a52;
+  --accent-dark: #104e3d;
+  --accent-soft: #e7f1ec;
+  --gold: #8a6a1f;
+  --danger: #b3382f;
+  --danger-soft: #fbeae8;
+  --ok: #1e7a4d;
+  --ok-soft: #e6f4ec;
+  --warn: #8a6a1f;
+  --warn-soft: #fbf1dd;
+  --shadow: 0 14px 34px rgba(23, 37, 34, 0.12);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e8eef2;
+  --muted: #9bb0bd;
+  --paper: #10202a;
+  --surface: #162934;
+  --line: #27404e;
+  --accent: #2f8f6b;
+  --accent-dark: #1f6a4f;
+  --accent-soft: #1b3a34;
+  --gold: #e0b163;
+  --danger: #e07a72;
+  --danger-soft: #3a2220;
+  --ok: #62c08c;
+  --ok-soft: #1d3a2b;
+  --warn: #e0b163;
+  --warn-soft: #3a3020;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.surface { background: var(--surface); }
+.btn.secondary { color: var(--ink); }
+.btn.ghost { color: var(--gold); }
+
+.stat-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.stat {
+  padding: 16px; border: 1px solid var(--line); border-radius: 10px;
+  background: linear-gradient(160deg, var(--accent-soft), var(--surface) 70%);
+}
+.stat strong { display: block; font-size: 26px; color: var(--gold); }
+.stat span { font-size: 13px; color: var(--muted); }
+
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-top: 14px; }
+.filter-bar .field { min-width: 210px; }
+
+/* Dashboard: role breakdown chips and the three activity charts. */
+.role-row { margin-top: 10px; display: grid; gap: 4px; }
+.chip {
+  display: inline-block; margin: 0 4px 4px 0; padding: 2px 9px; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--accent-soft); color: var(--ink); font-size: 12px;
+}
+.chip b { color: var(--gold); }
+.chart-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.chart-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface); }
+.chart-card h3 { margin: 0 0 4px; font-size: 14px; }
+.chart-range { margin: 0 0 10px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 4px; min-height: 120px; }
+.chart-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; flex: 1; min-width: 0; }
+.chart-count { font-size: 10px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.chart-bar { display: block; width: 100%; max-width: 26px; border-radius: 4px 4px 0 0; background: var(--accent); }
+.chart-label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+/* Group cards (admin) */
+.card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.group-card {
+  display: grid; gap: 8px; align-content: start; padding: 15px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface);
+}
+.group-card h3 { margin: 0; font-size: 15px; }
+.group-card p { margin: 0; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.group-card .notes { color: var(--gold); }
+.group-card .card-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--muted); }
+.group-card .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Dialogs (group edit, subject edit, activity details) */
+dialog.app-dialog {
+  border: 1px solid var(--line); border-radius: 12px; padding: 20px; width: min(560px, calc(100vw - 32px));
+  background: var(--surface); color: var(--ink); box-shadow: var(--shadow);
+}
+dialog.app-dialog::backdrop { background: rgba(6, 14, 20, 0.6); }
+dialog.app-dialog h2 { margin-top: 0; }
+dialog.app-dialog .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+dialog.app-dialog dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; }
+dialog.app-dialog dt { color: var(--muted); font-weight: 700; font-size: 13px; }
+dialog.app-dialog dd { margin: 0; overflow-wrap: anywhere; font-size: 13px; }
+
+@media (max-width: 1000px) {
+  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chart-grid, .card-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .filter-bar .field { min-width: 100%; }
+}
+
+.log { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.log li {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; padding: 9px 11px;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--surface); font-size: 13px;
+}
+.log time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.log .who { font-weight: 700; }

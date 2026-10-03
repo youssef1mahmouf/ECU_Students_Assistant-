@@ -3,24 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5f7f2">
   <title>المجموعات · بوابة المجموعات</title>
-  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/user/styles.css">
 </head>
-<body data-page="groups" data-base="..">
-  <header class="shell topbar">
-    <button class="brand-home" id="brandHome" type="button"><span class="brand-mark" aria-hidden="true">م</span><span>بوابة المجموعات<small>إدارة بسيطة للحسابات والمجموعات</small></span></button>
-    <nav class="header-nav" aria-label="التنقل"><button id="mainNav" type="button">الرئيسية</button><button id="groupsNav" type="button">المجموعات</button><button id="signInNav" type="button">تسجيل الدخول</button><button id="profileNav" type="button">الملف الشخصي</button></nav>
-    <div class="header-actions"><div class="notification-wrap"><button class="icon-button" id="notificationsButton" type="button" aria-label="الإشعارات">⌁<span class="notification-count hidden" id="notificationCount"></span></button><div class="notification-panel hidden" id="notificationPanel"></div></div><span class="hidden" id="headerIdentity"></span><button class="icon-button hidden" id="headerAvatar" type="button" aria-label="الملف الشخصي">م</button><button class="icon-button" id="refreshButton" type="button" aria-label="تحديث الصفحة">↻</button><button class="language-button" id="languageToggle" type="button">English</button><span class="local-note">نسخة تجريبية · تخزين محلي</span></div>
-  </header>
-  <main class="shell">
-    <section class="panel active" id="userPanel" role="region" aria-label="قسم المستخدم">
-      <div class="surface main-card" id="userContent"></div>
+<body data-page-title="title.groups">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <div id="userBanner"></div>
+    <section class="surface">
+      <p class="eyebrow" data-i18n="nav.groups">المجموعات</p>
+      <h1 data-i18n="user.pickGroup">اختيار المجموعة</h1>
+      <p class="subtext" data-i18n="user.pickGroupNote">تغيير المجموعة يحتاج اعتمادًا جديدًا من الأدمن.</p>
+      <div class="group-grid" id="groupCards"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
+      <p class="message" id="groupMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="surface" aria-labelledby="group-content-heading">
+      <h2 id="group-content-heading" data-i18n="user.groupContent">محتوى المجموعة</h2>
+      <div class="list" id="groupRecords"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
     </section>
   </main>
-  <footer class="shell">Created by Youssef Mahmoud Shaban · WhatsApp: <a href="https://wa.me/201102734090" target="_blank" rel="noopener">01102734090</a></footer>
 
-  <script src="../shared.js"></script>
-  <script src="script.js"></script>
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/user/scripts/groups.js"></script>
 </body>
 </html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>المعلومات · بوابة المجموعات</title>
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body data-page-title="title.information">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <section class="surface">
+      <p class="eyebrow" data-i18n="admin.information">المعلومات</p>
+      <h1 data-i18n="admin.siteData">بيانات الموقع</h1>
+      <p class="subtext" data-i18n="admin.siteDataNote">هذه الحقول تظهر في الصفحة العامة وصفحة التقييمات.</p>
+
+      <form id="infoForm">
+        <div class="form-grid">
+          <div class="field"><label for="infoTitle" data-i18n="field.title">العنوان</label><input id="infoTitle" maxlength="120" required></div>
+          <div class="field"><label for="infoTagline" data-i18n="field.tagline">الوصف المختصر</label><input id="infoTagline" maxlength="160"></div>
+          <div class="field"><label for="infoYear" data-i18n="field.academicYear">العام الدراسي</label><input id="infoYear" maxlength="40"></div>
+          <div class="field"><label for="infoNotice" data-i18n="field.notice">الإشعار</label><input id="infoNotice" maxlength="400"></div>
+          <div class="field full"><label for="infoAbout" data-i18n="field.about">عن البوابة</label><textarea id="infoAbout" maxlength="1200"></textarea></div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit" data-i18n="action.save">حفظ</button>
+          <a class="btn secondary" href="/guest/assessments/" data-i18n="action.previewAssessments">معاينة صفحة التقييمات</a>
+        </div>
+        <p class="message" id="infoMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/admin/scripts/information.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإبلاغ عن مشكلة · بوابة المجموعات</title>
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/user/styles.css">
+</head>
+<body data-page-title="title.report">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <div id="userBanner"></div>
+    <section class="surface">
+      <p class="eyebrow" data-i18n="nav.report">الإبلاغ عن مشكلة</p>
+      <h1 data-i18n="problems.title">الإبلاغ عن مشكلة</h1>
+      <p class="subtext" data-i18n="problems.note">يُحفظ البلاغ ويظهر للإدارة، وتُرسل نسخة إلى بريد الدعم عند توفر البريد.</p>
+
+      <form id="problemForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="problemCategory" data-i18n="field.category">التصنيف</label>
+            <select id="problemCategory" name="category" required>
+              <option value="bug" data-i18n="problems.categoryBug">مشكلة تقنية</option>
+              <option value="content" data-i18n="problems.categoryContent">محتوى غير صحيح</option>
+              <option value="account" data-i18n="problems.categoryAccount">مشكلة في الحساب</option>
+              <option value="group" data-i18n="problems.categoryGroup">مشكلة في المجموعة</option>
+              <option value="other" data-i18n="problems.categoryOther">موضوع آخر</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="problemPage" data-i18n="field.page">الصفحة</label>
+            <input id="problemPage" name="page" maxlength="200" dir="ltr">
+            <span class="hint" data-i18n="problems.pageAuto">تُرفق الصفحة التي تُبلِّغ منها تلقائيًا.</span>
+          </div>
+          <div class="field full">
+            <label for="problemDescription" data-i18n="admin.problemDescription">الوصف</label>
+            <textarea id="problemDescription" name="description" rows="6" maxlength="2000" required data-i18n-placeholder="problems.descriptionPlaceholder" placeholder="اكتب ما حدث بالتفصيل…"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit" id="problemSubmit" data-i18n="action.send">إرسال</button>
+        </div>
+        <p class="message" id="problemMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/user/scripts/report.js"></script>
+</body>
+</html>

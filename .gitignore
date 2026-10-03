@@ -10,6 +10,15 @@ backend/atlas-credentials.env
 *.log
 npm-debug.log*
 
+# Local JSON data store (DATA_STORE=file) - never commit real accounts
+backend/data_base/
+data_base/
+
+# Uploaded documents - private binaries, served only through the authorization-checked API.
+# `storage/*` (not `storage/`) so the .gitkeep placeholder can stay tracked.
+backend/storage/*
+!backend/storage/.gitkeep
+
 # Editor / OS
 .vscode/
 .DS_Store

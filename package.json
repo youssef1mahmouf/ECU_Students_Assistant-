@@ -1,0 +1,35 @@
+{
+  "name": "ga6-ecu-students-assessment",
+  "version": "2.0.0",
+  "private": true,
+  "description": "ECU students assessment portal: guest, user and admin areas served by an Express API with MongoDB (Atlas or local file store).",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "seed": "node backend/scripts/seed.js",
+    "seed:demo": "node backend/scripts/seed.js --with-demo",
+    "seed:mongo": "node backend/scripts/seed.js --store=mongo",
+    "import:roster": "node backend/scripts/import-roster.js",
+    "import:library": "node backend/scripts/import-material-library.js",
+    "repair:sessions": "node backend/scripts/repair-sessions.js",
+    "extract:roster": "node backend/scripts/extract-roster.js",
+    "verify:roster": "node backend/scripts/verify-roster.js",
+    "seed:catalog": "node backend/scripts/seed-catalog.js",
+    "bootstrap:owner": "node backend/scripts/bootstrap-owner.js",
+    "check": "node backend/scripts/check-syntax.js",
+    "verify": "node backend/scripts/smoke-test.js",
+    "verify:pages": "node backend/scripts/page-smoke.js",
+    "verify:documents": "node backend/scripts/verify-documents.js",
+    "test:db": "node backend/test-conn.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "mongodb": "^7.6.0",
+    "mongoose": "^9.10.2"
+  }
+}

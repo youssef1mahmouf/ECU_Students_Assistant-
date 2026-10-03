@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>المجموعات · بوابة المجموعات</title>
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body data-page-title="title.groups">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <section class="surface">
+      <p class="eyebrow" data-i18n="admin.groups">المجموعات</p>
+      <h1 data-i18n="admin.groupsManage">إدارة المجموعات</h1>
+      <p class="subtext" data-i18n="admin.groupsNote">إنشاء المجموعات، تعديلها، وحذفها مع محتواها.</p>
+
+      <div class="card-grid" id="groupRows">
+        <p class="empty" data-i18n="msg.loading">جار التحميل…</p>
+      </div>
+      <p class="message" id="groupMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <dialog class="app-dialog" id="groupDialog" aria-labelledby="groupDialogTitle">
+      <h2 id="groupDialogTitle" data-i18n="admin.editGroup">تعديل المجموعة</h2>
+      <form id="groupEditForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="editGroupName" data-i18n="field.name">الاسم</label>
+            <input id="editGroupName" name="name" maxlength="60" required>
+          </div>
+          <div class="field">
+            <label for="editGroupDescription" data-i18n="field.description">الوصف</label>
+            <input id="editGroupDescription" name="description" maxlength="300">
+          </div>
+          <div class="field full">
+            <label for="editGroupNotes" data-i18n="field.notes">ملاحظات</label>
+            <textarea id="editGroupNotes" name="notes" rows="3" maxlength="2000"></textarea>
+            <span class="hint" data-i18n="admin.notesHint">ملاحظات داخلية للأدمن فقط ولا تظهر للطلاب.</span>
+          </div>
+          <div class="field full">
+            <label for="editGroupSubjects" data-i18n="admin.assignedSubjects">المواد المرتبطة</label>
+            <select id="editGroupSubjects" name="subjects" multiple size="5"></select>
+            <span class="hint" data-i18n="field.multiSelectHint">اختيار متعدد: Ctrl (أو Cmd) لتحديد أكثر من قيمة.</span>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button class="btn secondary" type="button" id="groupEditCancel" data-i18n="action.cancel">إلغاء</button>
+          <button class="btn" type="submit" id="groupEditSubmit" data-i18n="action.save">حفظ</button>
+        </div>
+        <p class="message" id="groupEditMessage" role="status" aria-live="polite"></p>
+      </form>
+    </dialog>
+
+    <section class="surface" aria-labelledby="group-heading">
+      <h2 id="group-heading" data-i18n="admin.newGroup">مجموعة جديدة</h2>
+      <form id="groupForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="groupNameInput" data-i18n="field.name">الاسم</label>
+            <input id="groupNameInput" name="name" maxlength="60" required>
+          </div>
+          <div class="field">
+            <label for="groupDescription" data-i18n="field.description">الوصف</label>
+            <input id="groupDescription" name="description" maxlength="300">
+          </div>
+          <div class="field full">
+            <label for="groupNotes" data-i18n="field.notes">ملاحظات</label>
+            <textarea id="groupNotes" name="notes" rows="3" maxlength="2000"></textarea>
+            <span class="hint" data-i18n="admin.notesHint">ملاحظات داخلية للأدمن فقط ولا تظهر للطلاب.</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit" id="groupSubmit" data-i18n="action.create">إنشاء</button>
+        </div>
+        <p class="message" id="groupFormMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="surface" aria-labelledby="content-heading">
+      <h2 id="content-heading" data-i18n="admin.content">المحتوى</h2>
+      <div class="field inline">
+        <label for="contentGroup" data-i18n="field.group">المجموعة</label>
+        <select id="contentGroup"></select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption id="recordsCaption" data-i18n="admin.recordList">قائمة المحتوى</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="field.title">العنوان</th>
+              <th scope="col" data-i18n="field.group">المجموعة</th>
+              <th scope="col" data-i18n="field.kind">النوع</th>
+              <th scope="col" data-i18n="field.dueDate">تاريخ التسليم</th>
+              <th scope="col" data-i18n="field.status">الحالة</th>
+              <th scope="col" data-i18n="field.actions">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="contentRows">
+            <tr><td colspan="6" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="surface" aria-labelledby="record-heading">
+      <h2 id="record-heading" data-i18n="admin.newRecord">محتوى جديد</h2>
+      <form id="recordForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="recordGroup" data-i18n="field.groups">المجموعات</label>
+            <select id="recordGroup" name="groups" multiple size="4" required></select>
+            <span class="hint" data-i18n="field.multiSelectHint">اختيار متعدد: Ctrl (أو Cmd) لتحديد أكثر من قيمة.</span>
+          </div>
+          <div class="field">
+            <label for="recordTitle" data-i18n="field.title">العنوان</label>
+            <input id="recordTitle" name="title" maxlength="140" required>
+          </div>
+          <div class="field">
+            <label for="recordKind" data-i18n="field.kind">النوع</label>
+            <select id="recordKind" name="kind"></select>
+          </div>
+          <div class="field">
+            <label for="recordDueDate" data-i18n="field.dueDate">تاريخ التسليم</label>
+            <input id="recordDueDate" name="dueDate" type="date">
+            <span class="hint" data-i18n="field.dueDateDefault">يُقترح بعد أسبوع من اليوم ويمكن تعديله.</span>
+          </div>
+          <div class="field full">
+            <label for="recordSummary" data-i18n="field.summary">ملخص</label>
+            <input id="recordSummary" name="summary" maxlength="280">
+          </div>
+          <div class="field full">
+            <label for="recordBody" data-i18n="field.body">المحتوى</label>
+            <textarea id="recordBody" name="body" rows="5" maxlength="4000"></textarea>
+          </div>
+          <div class="field full">
+            <label class="check" for="recordPublished">
+              <input id="recordPublished" name="published" type="checkbox">
+              <span data-i18n="field.published">منشور للطلاب</span>
+            </label>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit" id="recordSubmit" data-i18n="action.create">إنشاء</button>
+        </div>
+        <p class="message" id="recordMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/admin/scripts/groups.js"></script>
+</body>
+</html>

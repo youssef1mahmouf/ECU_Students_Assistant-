@@ -1,0 +1,11 @@
+{
+  "$comment": "Default bilingual subject list. No personal data: it is shipped code, not live data. The slug names the storage folder (backend/storage/<group>/<slug>/) and must stay stable.",
+  "subjects": [
+    { "slug": "assessments", "code": "ASM", "nameEn": "Assessments", "nameAr": "التقييمات" },
+    { "slug": "materials", "code": "MAT", "nameEn": "Materials", "nameAr": "المذكرات" },
+    { "slug": "announcements", "code": "ANN", "nameEn": "Announcements", "nameAr": "الإعلانات" },
+    { "slug": "projects", "code": "PRJ", "nameEn": "Projects", "nameAr": "المشاريع" },
+    { "slug": "schedules", "code": "SCH", "nameEn": "Schedules", "nameAr": "الجداول" },
+    { "slug": "results", "code": "RES", "nameEn": "Results", "nameAr": "النتائج" }
+  ]
+}

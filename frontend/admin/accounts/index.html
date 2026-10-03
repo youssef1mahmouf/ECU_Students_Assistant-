@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>الحسابات · بوابة المجموعات</title>
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body data-page-title="title.accounts">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <section class="surface">
+      <p class="eyebrow" data-i18n="admin.accounts">الحسابات</p>
+      <h1 data-i18n="admin.accountsManage">إدارة الحسابات</h1>
+      <p class="subtext" data-i18n="admin.accountsNote">اعتماد الانضمام، التعطيل، تغيير المجموعة، إعادة تعيين كلمة المرور. السوبر أدمن فقط يغيّر الأدوار أو يدير حسابات الأدمن.</p>
+
+      <div class="table-wrap">
+        <table>
+          <caption id="accountsCaption" data-i18n="admin.accountList">قائمة الحسابات</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="field.name">الاسم</th>
+              <th scope="col" data-i18n="field.email">البريد الإلكتروني</th>
+              <th scope="col" data-i18n="field.group">المجموعة</th>
+              <th scope="col" data-i18n="field.status">الحالة</th>
+              <th scope="col" data-i18n="field.actions">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="accountRows">
+            <tr><td colspan="5" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="message" id="accountMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="surface" aria-labelledby="create-heading">
+      <h2 id="create-heading" data-i18n="admin.newAccount">حساب جديد</h2>
+      <form id="createForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="createName" data-i18n="field.name">الاسم</label>
+            <input id="createName" name="name" maxlength="80" required>
+          </div>
+          <div class="field">
+            <label for="createEmail" data-i18n="field.email">البريد الإلكتروني</label>
+            <input id="createEmail" name="email" type="email" required>
+          </div>
+          <div class="field">
+            <label for="createGroup" data-i18n="field.group">المجموعة</label>
+            <select id="createGroup" name="group"></select>
+          </div>
+          <div class="field">
+            <label for="createRole" data-i18n="field.role">الدور</label>
+            <select id="createRole" name="role">
+              <option value="user" data-i18n="role.user">طالب</option>
+              <option value="adminAssistant" data-i18n="role.adminAssistant">مساعد أدمن</option>
+              <option value="superAdminAssistant" data-i18n="role.superAdminAssistant">مساعد سوبر أدمن</option>
+              <option value="doctor" data-i18n="role.doctor">دكتور</option>
+              <option value="engineer" data-i18n="role.engineer">مهندس</option>
+              <option value="admin" data-i18n="role.admin">أدمن</option>
+              <option value="superAdmin" data-i18n="role.superAdmin">سوبر أدمن</option>
+            </select>
+            <span class="hint" data-i18n="admin.roleHintPrivileged">الأدوار غير الطلابية (مساعدون، دكتور، مهندس، أدمن) يُنشئها السوبر أدمن فقط.</span>
+            <span class="hint" data-i18n="admin.protectedNote">الحساب الأساسي محمي: كلمة مروره وتعطيله وحذفه غير متاحة من هنا.</span>
+          </div>
+          <div class="field full">
+            <label for="createPassword" data-i18n="field.password">كلمة المرور</label>
+            <input id="createPassword" name="password" type="password" autocomplete="new-password" required>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit" id="createSubmit" data-i18n="action.create">إنشاء</button>
+        </div>
+        <p class="message" id="createMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/admin/scripts/accounts.js"></script>
+</body>
+</html>

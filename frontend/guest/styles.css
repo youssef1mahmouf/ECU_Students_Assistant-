@@ -1,0 +1,34 @@
+/* Guest area: the light green identity with the gold accent. */
+:root { color-scheme: light; }
+
+.hero {
+  margin-bottom: 22px; padding: 30px 24px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: linear-gradient(140deg, var(--accent-soft), var(--surface) 62%);
+  box-shadow: var(--shadow);
+}
+.hero h1 { font-size: 30px; color: var(--accent-dark); }
+.hero .lead { max-width: 60ch; font-size: 16px; }
+.hero .actions { margin-top: 20px; }
+
+main > .surface { margin-bottom: 18px; }
+.note .steps { margin: 0 0 10px; padding-inline-start: 22px; }
+.note .steps li { margin-bottom: 6px; }
+
+.group-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.group-card {
+  display: grid; gap: 8px; padding: 16px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface);
+}
+.group-card h3 { margin: 0; font-size: 15px; }
+.group-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+.assessment-card {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 14px 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+}
+.assessment-card h3 { margin: 0 0 3px; font-size: 15px; }
+.assessment-card p { margin: 0; color: var(--muted); font-size: 13px; }
+.assessment-meta { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; gap: 5px; }
+
+@media (max-width: 900px) { .group-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .group-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 24px; } }

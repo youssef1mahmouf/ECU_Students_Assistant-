@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التقييمات المعلنة · بوابة المجموعات</title>
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/guest/styles.css">
+</head>
+<body data-page-title="title.assessments">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <section class="surface">
+      <p class="eyebrow" data-i18n="guest.publicEyebrow">Public information</p>
+      <h1 data-i18n="guest.assessments">التقييمات المعلنة</h1>
+      <p class="subtext" data-i18n="guest.assessmentsNote">كل ما هو مسموح للزوار بمشاهدته. تفاصيل المجموعة الكاملة تتطلب تسجيل الدخول والاعتماد.</p>
+      <div class="banner info" id="siteNotice" hidden></div>
+      <div class="table-wrap">
+        <table>
+          <caption data-i18n="guest.assessmentsCaption">جدول التقييمات المعلنة</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="field.title">العنوان</th>
+              <th scope="col" data-i18n="field.group">المجموعة</th>
+              <th scope="col" data-i18n="field.kind">النوع</th>
+              <th scope="col" data-i18n="field.dueDate">تاريخ التسليم</th>
+            </tr>
+          </thead>
+          <tbody id="assessmentRows">
+            <tr><td colspan="4" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/user/signin/" data-i18n="action.signInContent">تسجيل الدخول للوصول للمحتوى</a>
+        <a class="btn secondary" href="/user/" data-i18n="action.backHome">العودة للرئيسية</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/guest/scripts/assessments.js"></script>
+</body>
+</html>

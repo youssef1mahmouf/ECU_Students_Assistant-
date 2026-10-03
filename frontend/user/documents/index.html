@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>ملفات المجموعة · بوابة المجموعات</title>
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/user/styles.css">
+</head>
+<body data-page-title="title.userDocuments">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+  <header class="topbar" id="appHeader"></header>
+
+  <main id="main" class="shell">
+    <section class="surface">
+      <p class="eyebrow" data-i18n="user.documents">ملفاتي</p>
+      <h1 data-i18n="user.documentsTitle">ملفات مجموعتك</h1>
+      <p class="subtext" id="userDocumentsLead" data-i18n="user.documentsNote">تظهر هنا الملفات المنشورة لمجموعتك فقط. مجموعة أخرى أو ملف غير منشور لن يظهر ولن يُفتح.</p>
+
+      <h2 data-i18n="package.subjects">المواد</h2>
+      <div class="subject-grid" id="userSubjectCards"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
+      <div class="list" id="userPackageList"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
+      <p class="message" id="userDocumentMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <!-- Index of the teaching-material library on disk. Names and sizes only; nothing is served. -->
+    <section class="surface">
+      <p class="eyebrow">Library</p>
+      <h1>Course materials index</h1>
+      <p class="subtext">Every subject, week and session material held in the shared library folder. Open a subject to browse it.</p>
+      <div id="userLibrary"><p class="empty">Loading…</p></div>
+    </section>
+  </main>
+
+  <footer class="shell" id="appFooter"></footer>
+  <script type="module" src="/user/scripts/documents.js"></script>
+</body>
+</html>
