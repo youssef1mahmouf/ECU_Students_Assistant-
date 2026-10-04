@@ -1,4 +1,7 @@
-require('dotenv').config();
+const path = require('path');
+// The same file every other module reads, so this one behaves identically whether the
+// process was started from the repository root or from inside backend/.
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const { MongoClient } = require('mongodb');
 
 const dbName = process.env.MONGODB_DB_NAME || 'ga6';

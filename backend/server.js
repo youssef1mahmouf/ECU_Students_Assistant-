@@ -5,14 +5,21 @@
  */
 const config = require('./src/config/env');
 const { createApp } = require('./src/app');
-const { init, kind, close } = require('./src/db/store');
+const db = require('./src/db/store');
+const { init, close } = db;
 
 async function main() {
   await init();
   const app = createApp();
   const server = app.listen(config.port, config.host, () => {
     console.log(`GA6 Group Portal - ${config.env}`);
-    console.log(`  data store : ${kind}${config.hasMongoCredentials && kind === 'mongo' ? ' (MongoDB Atlas)' : ''}`);
+    /* Read the live adapter after init(), because a failed Atlas connection falls back to
+       the file store and the banner must say what is actually serving the data. */
+    const kind = db.kind;
+    console.log(`  data store : ${kind}${kind === 'mongo' ? ' (MongoDB Atlas)' : ` (${config.dataDir})`}`);
+    if (kind === 'file' && config.dataStore === 'mongo') {
+      console.log('              (Atlas was configured but unreachable - using the file store)');
+    }
     console.log(`  listening  : http://${config.host}:${config.port}`);
     console.log('  areas      : /            guest');
     console.log('               /user/       student area');
@@ -39,6 +46,14 @@ async function main() {
 
 main().catch((error) => {
   console.error('[server] failed to start:', error.message);
+  if (/SSL|TLS|ssl3|tlsv1|handshake/i.test(error.message || '')) {
+    console.error(
+      '  The TLS handshake with MongoDB Atlas failed. This is a network problem, not a\n' +
+      '  credentials problem. To run against the local JSON store instead:\n' +
+      '    PowerShell : $env:DATA_STORE="file"; npm start\n' +
+      '    bash       : DATA_STORE=file npm start'
+    );
+  }
   if (config.isProduction) process.exit(1);
   process.exitCode = 1;
 });

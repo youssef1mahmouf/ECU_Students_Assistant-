@@ -38,6 +38,45 @@
   margin-inline: auto;
 }
 
+/* Above the drawer's breakpoint the navigation is in the bar, and it is centred
+   there. Two equal side columns with the navigation between them put it on the
+   centre of the bar itself - a single auto margin cannot do that, because it
+   centres the navigation in whatever space is left, and the brand and the action
+   group are not the same width.
+   Below the breakpoint the navigation lives in the drawer, so this grid is not
+   used at all and the controls keep the full width a phone gives them. */
+/* Each rule is scoped to .topbar__inner on purpose. A media query adds no
+   specificity of its own, so a bare `.topnav` here would tie with the base rule
+   further down the file and then lose to it on source order - which is exactly
+   how an inline margin survived here once and pulled the navigation 4px off
+   the centre. Child selectors settle it. */
+@media (min-width: 1081px) {
+  .topbar__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .topbar__inner > .brand {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .topbar__inner > .topnav {
+    grid-column: 2;
+    justify-self: center;
+    /* The grid gap already separates the navigation from the brand. Leaving the
+       inline margin in place would shift the item by half its own width inside
+       the centre column and pull it off the middle of the bar. */
+    margin-inline-start: 0;
+  }
+
+  .topbar__inner > .topbar__actions {
+    grid-column: 3;
+    justify-self: end;
+    margin-inline-start: 0;
+  }
+}
+
 /* ---------------------------------------------------------------- brand */
 .brand {
   display: inline-flex;
@@ -284,6 +323,54 @@
   margin-block-start: var(--space-6);
 }
 
+/* ------------------------------------------------------- auth layout */
+/* Shared by /user/signin/ and /user/register/, so the two authentication pages
+   are laid out by one rule and cannot drift apart. The frame is a single
+   column that fills the space between header and footer, and the card is
+   centred inside it - horizontally and, when there is room, vertically.
+   Nothing here is measured in pixels, so it survives a font-size change. */
+.app__body--auth {
+  grid-template-columns: minmax(0, 1fr);
+  /* Stretch, not start: the card is centred in the full height of the frame
+     rather than pinned under the header. */
+  align-items: stretch;
+}
+
+.auth-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-layout__card {
+  width: min(100%, 32rem);
+  margin-inline: auto;
+  padding: var(--space-6);
+}
+
+/* The authentication actions are one centred row on a wide screen. At phone
+   width they stack and each button takes the full width, which is both easier
+   to hit and the convention the rest of the app follows for primary actions. */
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+@media (max-width: 520px) {
+  .auth-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .auth-actions > .btn {
+    width: 100%;
+  }
+}
+
 .page__section:first-child {
   margin-block-start: 0;
 }
@@ -418,22 +505,3 @@
     height: 2rem;
   }
 }
-  :root {
-    --content-gutter: var(--space-4);
-  }
-
-  .topbar__inner {
-    gap: var(--space-2);
-  }
-
-  /* Below this width the mark alone identifies the product; the wordmark would
-     only be truncated to nothing while squeezing the controls that matter. */
-  .brand__text {
-    display: none;
-  }
-
-  .language-button {
-    min-width: 3.75rem;
-    padding: 0 var(--space-2);
-    font-size: var(--text-xs);
-  }

@@ -18,9 +18,9 @@
   <div class="app">
     <header class="topbar" id="appHeader"></header>
 
-    <div class="app__body app__body--no-nav">
-      <main class="page" id="main" style="width:min(100%,32rem)">
-        <section class="card" style="padding:var(--space-6)">
+    <div class="app__body app__body--auth">
+      <main class="page auth-layout" id="main">
+        <section class="card auth-layout__card">
           <p class="eyebrow" data-i18n="nav.signin">تسجيل الدخول</p>
           <h1 style="margin-block:var(--space-2) var(--space-2)" data-i18n="user.signinTitle">سجّل الدخول إلى حسابك</h1>
           <p class="muted small" data-i18n="user.signinNote">ابدأ ببريدك الجامعي، ثم تظهر لك خطوة كلمة المرور.</p>
@@ -36,7 +36,7 @@
                      data-i18n-placeholder="field.emailExample" placeholder="192600250@ecu.edu.eg">
               <span class="hint" data-i18n="user.emailStepHint">استخدم بريدك الجامعي فقط، بدون مسافات.</span>
             </div>
-            <div class="cluster">
+            <div class="auth-actions">
               <button class="btn btn--primary" type="submit" id="emailContinue" data-i18n="action.continue">متابعة</button>
               <a class="btn btn--secondary" href="/user/register/" data-i18n="action.setPassword">إنشاء كلمة مرور</a>
             </div>

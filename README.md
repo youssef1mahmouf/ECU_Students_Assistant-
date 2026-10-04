@@ -102,8 +102,9 @@ Deliberately **not** added:
 
 Both libraries are **vendored into `frontend/shared/vendor/` by `npm run vendor`** and
 committed. The server sends `default-src 'self'; script-src 'self'`, so a CDN `<script>`
-would be blocked; vendoring also means a machine that never ran `npm install` inside
-`frontend/` still gets a working application.
+would be blocked; committing the vendored output also means the application still runs on a
+machine that never ran the frontend build at all. Dependencies themselves are installed
+once, from the repository root - see **Dependency ownership** below.
 
 ### Appearance
 
@@ -125,10 +126,37 @@ script and the only reason there is no white flash on navigation in dark mode.
   label.
 
 ---
+## Dependency ownership
+
+The repository is a **single npm workspace rooted at the repository root**:
+
+| Package | Manifest | Owns |
+| --- | --- | --- |
+| server + frontend | `package.json` (root) | express, mongodb, mongoose, dotenv, cors, puppeteer-core |
+| frontend | `frontend/package.json` (workspace) | lucide-static, pdfjs-dist |
+
+`npm ci` at the root installs both from **one** `package-lock.json`. There is deliberately
+no `frontend/package-lock.json`: a second lockfile is what previously let `pdfjs-dist`
+drift out of the lockfile and break a clean install.
+
+- Do **not** run `npm install` inside `frontend/`. It is not required, and it is the one
+  thing that hides a broken install.
+- `frontend/prepare.mjs` resolves `lucide-static` and `pdfjs-dist` by walking up to the
+  nearest `node_modules`, so it works whether npm hoists them to the root or keeps them
+  nested. It only validates; it never installs.
+- `backend/package.json` is a stale duplicate of the root manifest. Nothing reads it and
+  `npm ci` ignores it, but it can be deleted.
+
+---
+
 ## Quick start
 
+Requires **Node 20 or newer**. The server alone runs on 18.17+, but the frontend build needs
+20+ because of `pdfjs-dist`. `backend/` is not a separate npm project - see
+**Dependency ownership** below.
+
 ```bash
-npm install
+npm ci                                   # one lockfile: server AND frontend dependencies
 copy backend\.env.example backend\.env   # then edit it
 $env:DATA_STORE = "file"                 # PowerShell - Linux/macOS: export DATA_STORE=file
 npm run dev                              # local JSON store, http://127.0.0.1:3000
@@ -162,6 +190,26 @@ create the first super admin, then `npm start`).
 | `/user/notifications/` | what was published to the caller's own group |
 | `/user/settings/` | theme, density, motion and language |
 
+### Data store
+
+`DATA_STORE` picks the store. Left empty, Atlas is used when its credentials are present
+and the local JSON file otherwise.
+
+| Value | Store |
+| --- | --- |
+| *(unset)* | Atlas if credentials exist, otherwise the file store |
+| `file`, `json`, `local`, `none` | `backend/data_base/db.json` |
+| `mongo` | MongoDB Atlas |
+
+An unrecognised value is **reported**, not ignored - previously `DATA_STORE=json` was
+silently treated as "unset", which selected Atlas and stopped the server dead with a raw
+`SSL alert number 80` on any machine that could not reach the cluster.
+
+When Atlas is configured but unreachable, a **development** server falls back to the file
+store and says so, rather than refusing to start. Set `MONGO_FALLBACK_TO_FILE=false` to
+fail instead. Production is always strict: silently writing to a different datastore there
+would be worse than not starting at all.
+
 ## npm scripts
 
 | Command | What it does |
@@ -176,6 +224,10 @@ create the first super admin, then `npm start`).
 | `npm run verify:all` | all of the above, in order |
 | `cd frontend && npm run check` | syntax, stylesheet integrity and the bilingual key audit |
 | `cd frontend && npm run build` | vendors the two libraries, validates every page reference, emits `dist/` |
+
+Deployment (Cloudflare Pages) is exactly `npm ci` at the repository root, then
+`cd frontend && npm run build`. Nothing else is required, and nothing may be installed
+inside `frontend/`.
 | `node backend/scripts/i18n-audit.js` | bilingual audit of every key, reference and page |
 | `npm run extract:roster -- <pdf…>` | read the group PDFs into `backend/data_base/roster.<name>.json` + review report |
 | `npm run import:roster` | import that roster document (`--dry-run`, `--store=file`, `--json=<path>`) |

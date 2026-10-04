@@ -20,7 +20,7 @@
 import '/shared/theme.js';
 import { escapeHtml, initials, svg } from '/shared/ui.js';
 import { t, applyI18n, mountLanguageToggle, onLanguageChange } from '/shared/i18n.js';
-import { currentUser, permissions, loadSession, signOut } from '/shared/session.js';
+import { currentUser, permissions, loadSession, signOut, onSessionChange } from '/shared/session.js';
 import { navigationFor, topbarIdsFor, sidebarSectionsFor, accountLinksFor } from '/shared/nav.js';
 import { mountAppearanceToggle } from '/shared/theme.js';
 import { refreshViews } from '/shared/ui/view.js';
@@ -31,8 +31,19 @@ let shellWired = false;
 
 /* --------------------------------------------------------------- identity */
 
+/* Where the brand goes. Home for a visitor, and the account's own landing page
+   once there is a session - so the logo on /user/signin/ does not send a
+   signed-out visitor to /user/, which would only bounce them straight back to
+   the sign-in page they came from. Derived from the same session the rest of
+   the shell reads; no path is hard-coded per page. */
+function brandHome() {
+  if (booted.area === 'admin' && permissions().isAdmin) return '/admin/dashboard/';
+  if (booted.area === 'user' && currentUser()) return '/user/';
+  return '/';
+}
+
 function brandMarkup() {
-  const home = booted.area === 'admin' ? '/admin/dashboard/' : booted.area === 'user' ? '/user/' : '/';
+  const home = brandHome();
   return `<a class="brand" href="${home}">
       <span class="brand__mark" aria-hidden="true">ECU</span>
       <span class="brand__text">
@@ -120,6 +131,9 @@ function renderHeader() {
   const user = currentUser();
 
   header.className = 'topbar';
+  /* The stylesheet gives the bar three equal-purpose columns - brand,
+     navigation, actions - so the navigation is centred by the grid, not by a
+     margin that would only centre it in the space the brand happened to leave. */
   header.innerHTML = `<div class="topbar__inner">
       ${brandMarkup()}
       ${topnavMarkup()}
@@ -275,7 +289,38 @@ function wirePanel(buttonId, panelId) {
   });
 
   panel.addEventListener('click', (event) => event.stopPropagation());
-  document.addEventListener('click', () => close());
+
+  /* Arrow keys move between the entries, and Home/End jump to the ends. A menu
+     the mouse can open but the keyboard cannot move through is not a menu. */
+  panel.addEventListener('keydown', (event) => {
+    const items = [...panel.querySelectorAll('a, button')].filter((el) => !el.disabled && el.offsetParent !== null);
+    if (!items.length) return;
+    const here = items.indexOf(document.activeElement);
+    let next = -1;
+    if (event.key === 'ArrowDown') next = here < 0 ? 0 : (here + 1) % items.length;
+    else if (event.key === 'ArrowUp') next = here < 0 ? items.length - 1 : (here - 1 + items.length) % items.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = items.length - 1;
+    if (next < 0) return;
+    event.preventDefault();
+    items[next].focus();
+  });
+
+  /* Registered once per document, not once per panel. wirePanel() runs on every
+     redraw of the header, and a listener that closes the panel it captured would
+     otherwise keep a detached element alive and fire again on every later click. */
+  if (!document.documentElement.dataset.outsideCloseWired) {
+    document.documentElement.dataset.outsideCloseWired = '1';
+    document.addEventListener('click', () => {
+      for (const menu of document.querySelectorAll('.account-menu')) {
+        const panelEl = menu.querySelector('.menu');
+        const trigger = menu.querySelector('button');
+        if (!panelEl || panelEl.hidden) continue;
+        panelEl.hidden = true;
+        trigger?.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 }
 
 /** Drawer open/close for the mobile sidebar. */
@@ -311,10 +356,21 @@ function wireHeaderBehaviour() {
   wirePanel('accountButton', 'accountPanel');
   wirePanel('bellButton', 'bellPanel');
 
-  const signOut = document.getElementById('signOutButton');
-  if (signOut && !signOut.dataset.wired) {
-    signOut.dataset.wired = '1';
-    signOut.addEventListener('click', () => signOut({ redirectTo: '/' }));
+  /* The element is held in `button`, never in a name that also exists in this
+     module: a local `const signOut` used to shadow the imported signOut()
+     function, so the click handler called an HTMLElement and threw
+     "signOut is not a function" instead of signing anyone out. */
+  const button = document.getElementById('signOutButton');
+  if (button && !button.dataset.wired) {
+    button.dataset.wired = '1';
+    button.addEventListener('click', () => {
+      /* One click, one logout. Re-entrancy is blocked so a double click cannot
+         fire two requests, the second of which would 401 after the first
+         already destroyed the session. */
+      if (button.dataset.busy === '1') return;
+      button.dataset.busy = '1';
+      signOut({ redirectTo: '/' });
+    });
   }
 }
 
@@ -354,6 +410,14 @@ export async function bootChrome({ area = 'guest', active = '', preview = false 
 
     /* A language switch redraws navigation and every live view together. */
     onLanguageChange(() => refreshChrome());
+
+    /* Signing out changes what the chrome is allowed to show. Redrawing here is
+       what removes the account menu, the bell and the protected navigation from
+       the document at once; without it they would sit on screen until the
+       redirect finished, and would come back from the back/forward cache if it
+       never did. Registered after the first loadSession() above, so booting does
+       not immediately redraw itself. */
+    onSessionChange(() => refreshChrome());
   }
 
   return booted;

@@ -129,11 +129,32 @@ async function versionOf(pkgRoot) {
   return JSON.parse(await readFile(join(pkgRoot, 'package.json'), 'utf8')).version;
 }
 
+// Resolve an installed package directory the way Node's own resolver does: walk up from
+// this directory looking for node_modules/<name>.
+//
+// The repository root is an npm workspace, so npm may hoist these packages into
+// <repo>/node_modules. A standalone install inside frontend/ would instead place them in
+// frontend/node_modules. Both layouts must resolve identically, so never hard-code one.
+async function resolvePackage(name) {
+  let dir = ROOT;
+  for (;;) {
+    const candidate = join(dir, 'node_modules', ...name.split('/'));
+    if (await exists(candidate)) return candidate;
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
 async function main() {
-  const lucideRoot = join(ROOT, 'node_modules', 'lucide-static');
-  const pdfjsRoot = join(ROOT, 'node_modules', 'pdfjs-dist');
-  if (!(await exists(lucideRoot)) || !(await exists(pdfjsRoot))) {
-    console.error('vendor: run `npm install` in frontend/ first (lucide-static, pdfjs-dist missing).');
+  const lucideRoot = await resolvePackage('lucide-static');
+  const pdfjsRoot = await resolvePackage('pdfjs-dist');
+  const missing = [!lucideRoot && 'lucide-static', !pdfjsRoot && 'pdfjs-dist'].filter(Boolean);
+  if (missing.length) {
+    console.error(`vendor: ${missing.join(' and ')} not installed.`);
+    console.error('vendor: dependencies are owned by the repository root, which declares frontend/ as an npm workspace.');
+    console.error('vendor: run `npm ci` at the repository root, then `npm run build` in frontend/.');
+    console.error('vendor: running `npm install` inside frontend/ is neither required nor supported.');
     process.exit(1);
   }
 

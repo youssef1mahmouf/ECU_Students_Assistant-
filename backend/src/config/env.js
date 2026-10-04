@@ -26,10 +26,44 @@ const hasMongoCredentials = Boolean(
   process.env.MONGODB_URI || (process.env.MONGODB_USERNAME && process.env.MONGODB_PASSWORD)
 );
 
-// DATA_STORE=file|mongo overrides the automatic choice. 'file' keeps every record in
-// backend/data_base/db.json so the app is runnable (and testable) without Atlas access.
-let dataStore = (process.env.DATA_STORE || '').trim().toLowerCase();
-if (dataStore !== 'file' && dataStore !== 'mongo') dataStore = hasMongoCredentials ? 'mongo' : 'file';
+// DATA_STORE selects the store: 'file' (also spelled 'json', 'local' or 'none') keeps
+// every record in backend/data_base/db.json, 'mongo' uses Atlas. Left empty, the choice
+// follows whether Atlas credentials are present.
+//
+// The aliases exist because the file store *is* db.json, so "json" is the natural thing to
+// type - and an unrecognised value used to be ignored silently, which meant DATA_STORE=json
+// quietly selected Atlas and the server then died on a TLS handshake nobody asked for. An
+// unknown value is now reported rather than ignored.
+const FILE_STORE_ALIASES = new Set(['file', 'json', 'local', 'none']);
+const requestedStore = (process.env.DATA_STORE || '').trim().toLowerCase();
+
+let dataStore;
+if (!requestedStore) {
+  dataStore = hasMongoCredentials ? 'mongo' : 'file';
+} else if (FILE_STORE_ALIASES.has(requestedStore)) {
+  dataStore = 'file';
+} else if (requestedStore === 'mongo') {
+  dataStore = 'mongo';
+} else {
+  console.warn(
+    `[config] DATA_STORE="${requestedStore}" is not one of file|json|local|none|mongo - ` +
+      `ignoring it and using ${hasMongoCredentials ? 'mongo' : 'file'}.`
+  );
+  dataStore = hasMongoCredentials ? 'mongo' : 'file';
+}
+
+// When Atlas is configured but unreachable, a development machine should still start on the
+// file store rather than refuse to boot. Production stays strict: silently writing to a
+// different datastore there would be worse than not starting at all.
+const mongoFallbackToFile = asBool(process.env.MONGO_FALLBACK_TO_FILE, !isProduction);
+
+// The Atlas hostname, for a diagnostic that never prints the credential part of a URI.
+const mongoHost = (() => {
+  const hosts = (process.env.MONGODB_HOSTS || '').split(',').map((host) => host.trim()).filter(Boolean);
+  if (hosts.length) return hosts[0];
+  const match = /^(?:mongodb(?:\+srv)?:\/\/)?(?:[^@/]*@)?([^/?,]+)/.exec(process.env.MONGODB_URI || '');
+  return match ? match[1] : '';
+})();
 
 let sessionSecret = (process.env.SESSION_SECRET || '').trim();
 if (sessionSecret.length < 32) {
@@ -56,7 +90,10 @@ module.exports = {
     : path.join(BACKEND_DIR, 'data_base'),
 
   dataStore,
+  requestedStore,
   hasMongoCredentials,
+  mongoFallbackToFile,
+  mongoHost,
   trustProxy: asBool(process.env.TRUST_PROXY, false),
   session: {
     secret: sessionSecret,

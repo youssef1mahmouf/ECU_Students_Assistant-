@@ -23,7 +23,9 @@ export const dictionary = {
   'brand.sub': ['إدارة بسيطة للحسابات والمجموعات', 'Simple account and group management'],
   'nav.home': ['الرئيسية', 'Home'],
   'nav.groups': ['المجموعات', 'Groups'],
-  'nav.assessments': ['التقييمات', 'Assessments'],
+  /* Display label only. The key, the /guest/assessments/ route and every API
+     name stay exactly as they are; this is the word a person reads. */
+  'nav.assessments': ['المساعد', 'Assistant'],
   'nav.dashboard': ['لوحة التحكم', 'Dashboard'],
   'nav.accounts': ['الحسابات', 'Accounts'],
   'nav.activity': ['سجل النشاط', 'Activity log'],

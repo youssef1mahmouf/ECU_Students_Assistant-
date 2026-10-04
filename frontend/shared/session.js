@@ -80,18 +80,35 @@ export async function requireAdmin({ redirectTo = '/user/signin/' } = {}) {
 }
 
 /**
- * Ends the session. The read cache is dropped first: cached rows belonged to the
- * account that is leaving, so keeping them would show one user's data to the
- * next person at a shared machine.
+ * Ends the session. This is the single exit: the server is told first, the
+ * local state is cleared second, and only then does the browser move.
+ *
+ * Order matters. Clearing locally before the server answers would leave a
+ * window where the interface says "signed out" while the cookie still works.
+ * Doing the reverse would leave the opposite window. So the request goes first,
+ * and the `finally` block runs whichever way it went - a logout that fails on
+ * the network still ends locally, because a browser that keeps showing an
+ * account menu after someone pressed Sign Out is the worse of the two.
+ *
+ * `location.replace`, never `location.href`: href would push the public page
+ * onto the history stack, so the Back button would return to the authenticated
+ * page still holding its rendered chrome. replace() overwrites the entry.
  */
 export async function signOut({ redirectTo = '/' } = {}) {
   try {
     await api.post('/api/auth/logout');
+  } catch {
+    /* Deliberate. The local clear below is what must always happen. */
   } finally {
+    /* Cached reads belonged to the account that is leaving. Keeping them would
+       show one user's rows to the next person at a shared machine. */
     resetApiCache();
     current = { user: null, permissions: null };
+    /* Wakes the shell so the account menu, the bell and the protected
+       navigation are gone from this document immediately, rather than after a
+       reload has been requested but not yet completed. */
     notify();
-    window.location.href = redirectTo;
+    window.location.replace(redirectTo);
   }
 }
 

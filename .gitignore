@@ -29,6 +29,7 @@ frontend/node_modules/
 # Screenshots and the run log from `npm run verify:browser` are build output.
 # The account fixture is regenerated on every run and must never be committed.
 tools/browser-smoke/
+tools/auth-smoke/
 
 # Backend build/typecheck output
 backend/test-conn.log

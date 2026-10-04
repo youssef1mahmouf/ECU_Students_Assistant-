@@ -18,9 +18,9 @@
   <div class="app">
     <header class="topbar" id="appHeader"></header>
 
-    <div class="app__body app__body--no-nav">
-      <main class="page" id="main" style="width:min(100%,32rem)">
-        <section class="card" style="padding:var(--space-6)">
+    <div class="app__body app__body--auth">
+      <main class="page auth-layout" id="main">
+        <section class="card auth-layout__card">
           <p class="eyebrow" data-i18n="nav.register">حساب جديد</p>
           <h1 style="margin-block:var(--space-2) var(--space-2)" data-i18n="user.registerTitle">
             إنشاء كلمة مرور</h1>
@@ -65,7 +65,7 @@
                      autocomplete="new-password" minlength="8" required>
             </div>
 
-            <div class="cluster" style="margin-block-start:var(--space-4)">
+            <div class="auth-actions" style="margin-block-start:var(--space-4)">
               <button class="btn btn--primary" type="submit" id="registerSubmit" data-i18n="action.createPassword">
                 إنشاء كلمة المرور</button>
             </div>

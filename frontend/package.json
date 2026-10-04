@@ -12,11 +12,10 @@
     "build": "node prepare.mjs && node build.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
     "lucide-static": "^0.469.0",
     "pdfjs-dist": "^4.10.38"
-  },
-  "postinstall": "node prepare.mjs"
+  }
 }
