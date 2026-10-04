@@ -1,39 +1,68 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>ملفات المجموعة · بوابة المجموعات</title>
+  <title>ملفات مجموعتي</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/user/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
-<body data-page-title="title.userDocuments">
+<body data-page-title="title.documentsUser">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="user.documents">ملفاتي</p>
-      <h1 data-i18n="user.documentsTitle">ملفات مجموعتك</h1>
-      <p class="subtext" id="userDocumentsLead" data-i18n="user.documentsNote">تظهر هنا الملفات المنشورة لمجموعتك فقط. مجموعة أخرى أو ملف غير منشور لن يظهر ولن يُفتح.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <h2 data-i18n="package.subjects">المواد</h2>
-      <div class="subject-grid" id="userSubjectCards"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-      <div class="list" id="userPackageList"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-      <p class="message" id="userDocumentMessage" role="status" aria-live="polite"></p>
-    </section>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
 
-    <!-- Index of the teaching-material library on disk. Names and sizes only; nothing is served. -->
-    <section class="surface">
-      <p class="eyebrow">Library</p>
-      <h1>Course materials index</h1>
-      <p class="subtext">Every subject, week and session material held in the shared library folder. Open a subject to browse it.</p>
-      <div id="userLibrary"><p class="empty">Loading…</p></div>
-    </section>
-  </main>
+      <main class="page" id="main">
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.documents">الملفات</p>
+            <h1 data-i18n="documents.title">ملفات مجموعتي</h1>
+            <p class="lead" id="documentsLead" data-i18n="documents.subtitle">ملفات مجموعتك فقط.</p>
+          </div>
+          <div class="page-head__actions">
+            <!-- The library index is a different data set with its own page; this
+                 link is the only place the two pages reference each other. -->
+            <a class="btn btn--secondary" href="/user/library/">
+              <svg viewBox="0 0 24 24" width="1.05rem" height="1.05rem" aria-hidden="true" focusable="false">
+                <path d="m16 6 4 14M12 6v14M8 8v12M4 4v16"></path>
+              </svg>
+              <span data-i18n="documents.openLibrary">افتح فهرس المكتبة</span>
+            </a>
+          </div>
+        </div>
 
-  <footer class="shell" id="appFooter"></footer>
+        <div class="toolbar" id="documentsToolbar" hidden>
+          <div class="field">
+            <label for="documentSubject" data-i18n="field.subject">المادة</label>
+            <select class="control" id="documentSubject"></select>
+          </div>
+          <div class="field">
+            <label for="documentSearch" data-i18n="action.search">بحث</label>
+            <input class="control" id="documentSearch" type="search" autocomplete="off"
+                   data-i18n-placeholder="library.searchPlaceholder">
+          </div>
+          <span class="toolbar__spacer"></span>
+          <span class="count-pill" id="documentCount">0</span>
+        </div>
+
+        <!-- Exactly one renderer for exactly one endpoint. -->
+        <div id="userDocuments"></div>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/user/scripts/documents.js"></script>
 </body>
 </html>

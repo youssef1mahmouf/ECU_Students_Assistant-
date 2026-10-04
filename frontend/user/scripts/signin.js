@@ -1,5 +1,14 @@
-import { bootChrome } from '/shared/layout.js';
-import { api } from '/shared/api.js';
+﻿/**
+ * /user/signin/ - one email-first sign-in form for every role.
+ *
+ * The two steps are two real <form> elements in the markup, not one form that is
+ * reshaped by script, so each step has its own labels, its own focus target and
+ * its own submit handling. The password field exists in the page but inside the
+ * hidden step: the server has not yet said this address is known, so the browser
+ * never offers a password it could not use.
+ */
+import { bootChrome } from '/shared/shell.js';
+import { api, resetApiCache } from '/shared/api.js';
 import { showMessage, setBusy, toast } from '/shared/ui.js';
 import { loadSession, safeNext } from '/shared/session.js';
 import { t, serverText, onLanguageChange } from '/shared/i18n.js';
@@ -8,8 +17,8 @@ await bootChrome({ area: 'user', active: 'signin' });
 
 const session = await loadSession({ force: true });
 if (session.user) {
-  /* Already signed in: send each role where it belongs rather than to the student profile. */
-  window.location.replace(safeNext(session.permissions?.isAdmin ? '/admin/dashboard/' : '/user/profile/'));
+  /* Already signed in: send each role where it belongs. */
+  window.location.replace(safeNext(session.permissions?.isAdmin ? '/admin/dashboard/' : '/user/'));
 }
 
 const emailStep = document.getElementById('emailStep');
@@ -22,8 +31,8 @@ const submitButton = document.getElementById('loginSubmit');
 const signInAs = document.getElementById('signInAs');
 const setupLink = document.getElementById('setupLink');
 
-/** The last message shown, so a language switch repaints it instead of leaving old text. */
-let notice = { text: t('msg.empty'), type: 'info' };
+/* Kept so a language switch repaints the last message instead of leaving it stale. */
+let notice = { text: '', type: 'info' };
 let checkedEmail = '';
 
 function say(text, type = 'info') {
@@ -39,11 +48,9 @@ function show(step) {
   setupLink.href = `/user/register/?email=${encodeURIComponent(checkedEmail)}`;
 }
 
-/* The client normalises for display only; the server normalises again before it looks
-   anything up, and never trusts what the browser sent. */
-function readEmail() {
-  return String(emailField.value || '').trim().toLowerCase();
-}
+/* The client normalises for display only; the server normalises again before it
+   looks anything up, and never trusts what the browser sent. */
+const readEmail = () => String(emailField.value || '').trim().toLowerCase();
 
 emailStep.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -53,6 +60,7 @@ emailStep.addEventListener('submit', async (event) => {
     emailField.focus();
     return;
   }
+
   setBusy(continueButton, true, t('msg.busyChecking'));
   try {
     const answer = await api.post('/api/auth/check-email', { email });
@@ -93,18 +101,20 @@ passwordStep.addEventListener('submit', async (event) => {
     passwordField.focus();
     return;
   }
+
   setBusy(submitButton, true, t('msg.busySigningIn'));
   try {
-    /* One sign-in page for every role: the server decides where this account belongs, and
-       a staff account goes straight to the dashboard instead of the student profile. */
+    /* One form for every role: the server decides where the account belongs and
+       a staff account goes straight to the dashboard. */
     const result = await api.post('/api/auth/login', {
       email,
       password,
       remember: new FormData(passwordStep).get('remember') === 'on',
     });
+    /* A new session means every cached read belongs to the previous one. */
+    resetApiCache();
     toast(t('msg.signedIn'), 'success');
-    const landing = result?.permissions?.isAdmin ? '/admin/dashboard/' : '/user/profile/';
-    window.location.replace(safeNext(landing));
+    window.location.replace(safeNext(result?.permissions?.isAdmin ? '/admin/dashboard/' : '/user/'));
   } catch (error) {
     /* The server answers credential failures with one generic sentence on purpose. */
     say(serverText(error.message, { status: error.status }), 'error');

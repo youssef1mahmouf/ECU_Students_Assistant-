@@ -1,33 +1,54 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>المجموعات · بوابة المجموعات</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="robots" content="noindex">
+  <title>مجموعتك</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/user/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.groups">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <div id="userBanner"></div>
-    <section class="surface">
-      <p class="eyebrow" data-i18n="nav.groups">المجموعات</p>
-      <h1 data-i18n="user.pickGroup">اختيار المجموعة</h1>
-      <p class="subtext" data-i18n="user.pickGroupNote">تغيير المجموعة يحتاج اعتمادًا جديدًا من الأدمن.</p>
-      <div class="group-grid" id="groupCards"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-      <p class="message" id="groupMessage" role="status" aria-live="polite"></p>
-    </section>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-    <section class="surface" aria-labelledby="group-content-heading">
-      <h2 id="group-content-heading" data-i18n="user.groupContent">محتوى المجموعة</h2>
-      <div class="list" id="groupRecords"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-    </section>
-  </main>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
 
-  <footer class="shell" id="appFooter"></footer>
+      <main class="page" id="main">
+        <div id="userBanner"></div>
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.groups">المجموعات</p>
+            <h1 data-i18n="groups.title">مجموعتك</h1>
+            <p class="lead" data-i18n="groups.subtitle">اختر مجموعتك؛ أي تغيير يحتاج اعتمادًا جديدًا.</p>
+          </div>
+        </div>
+
+        <section class="page__section" aria-labelledby="group-picker">
+          <h2 id="group-picker" data-i18n="groups.yourGroup">مجموعتك</h2>
+          <div class="grid-auto" id="groupCards"></div>
+          <p class="message" id="groupMessage" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="page__section" aria-labelledby="group-content">
+          <h2 id="group-content" data-i18n="groups.content">محتوى المجموعة</h2>
+          <div id="groupRecords"></div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/user/scripts/groups.js"></script>
 </body>
 </html>

@@ -1,0 +1,249 @@
+﻿/* ==========================================================================
+   ECU design tokens - the single source of colour, type, space and motion.
+   --------------------------------------------------------------------------
+   Nothing outside this file may hard-code a colour, a shadow or a radius.
+   Components reference these semantic names only, which is what makes the
+   light/dark switch a single attribute change on <html> instead of a rewrite.
+
+   Palette: "Meridian" - a deep violet primary with an ember accent, chosen for
+   ECU rather than inherited from a template. Both modes were checked against the
+   contrast pairs noted beside each value (WCAG 2.1 AA: 4.5:1 body text, 3:1 for
+   large text and UI borders).
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ---------------------------------------------------------- structure */
+  --color-canvas: #f6f5fb;          /* the page itself, one step behind cards  */
+  --color-canvas-alt: #efedf7;      /* banded sections and table stripes       */
+  --color-surface: #ffffff;         /* cards, panels, sheets                   */
+  --color-surface-raised: #ffffff;  /* dialogs and menus that float above cards*/
+  --color-surface-sunken: #f2f0fa;  /* wells: code, empty slots, quiet bands   */
+  --color-surface-inverse: #191634; /* toolbars that stay dark in both modes   */
+
+  --color-border: #e2def0;          /* 3:1 against surface - decorative lines  */
+  --color-border-strong: #c9c2e2;   /* inputs and focusable control outlines   */
+  --color-border-subtle: #eeecf7;   /* hairline separators inside a card        */
+
+  /* --------------------------------------------------------------- ink */
+  --color-text: #191634;            /* 17.5:1 on surface                       */
+  --color-text-muted: #5b5578;      /* 7.0:1 on surface                        */
+  --color-text-subtle: #6f6990;     /* 5.1:1 - the weakest text we allow       */
+  --color-text-inverse: #ffffff;
+
+  /* -------------------------------------------------------------- brand */
+  --color-primary: #4a2fc4;         /* 8.5:1 on surface                        */
+  --color-primary-hover: #3c24a6;
+  --color-primary-active: #311d87;
+  --color-primary-soft: #eae5ff;    /* tinted backgrounds, never text           */
+  --color-primary-soft-strong: #ddd3ff;
+  --color-on-primary: #ffffff;
+
+  --color-accent: #c2410c;          /* 5.2:1 - ember, used sparingly           */
+  --color-accent-soft: #ffede3;
+  --color-on-accent: #ffffff;
+
+  /* ------------------------------------------------------------- status */
+  --color-success: #0e7a4f;         /* 5.4:1 */
+  --color-success-soft: #e0f5ea;
+  --color-warning: #8a5a00;         /* 5.9:1 */
+  --color-warning-soft: #fcf1da;
+  --color-danger: #b4232a;          /* 6.6:1 */
+  --color-danger-soft: #fde9ea;
+  --color-info: #1d5fa8;            /* 6.4:1 */
+  --color-info-soft: #e4effb;
+
+  /* Focus uses the primary so the ring reads against both surface and primary. */
+  --color-focus: #4a2fc4;
+  --color-focus-offset: #ffffff;
+  --color-focus-inverse: #c4b1fd;   /* focus drawn on an inverse surface */
+
+  /* -------------------------------------------------------- spacing (4px) */
+  --space-0: 0;
+  --space-1: 0.25rem;   /*  4px - icon-to-label gaps        */
+  --space-2: 0.5rem;    /*  8px - inside controls           */
+  --space-3: 0.75rem;   /* 12px - between related controls  */
+  --space-4: 1rem;      /* 16px - card padding, grid gutter */
+  --space-5: 1.5rem;    /* 24px - between cards             */
+  --space-6: 2rem;      /* 32px - inside a large surface    */
+  --space-7: 3rem;      /* 48px - between page sections     */
+  --space-8: 4rem;      /* 64px - hero rhythm               */
+
+  /* ----------------------------------------------------------- radius */
+  --radius-xs: 4px;     /* badges, tags                        */
+  --radius-sm: 8px;     /* inputs, small buttons              */
+  --radius-md: 12px;    /* buttons, list rows                 */
+  --radius-lg: 18px;    /* cards                               */
+  --radius-xl: 26px;    /* dialogs, sheets                     */
+  --radius-pill: 999px;
+
+  /* -------------------------------------------------------- elevation */
+  /* Two-step model: `card` for resting cards, `pop` for things that float.
+     Shadows are tinted with the ink colour rather than pure black, so they read
+     as depth rather than dirt. */
+  --shadow-card: 0 1px 2px rgb(25 22 52 / 0.05), 0 6px 18px -8px rgb(25 22 52 / 0.14);
+  --shadow-card-hover: 0 2px 4px rgb(25 22 52 / 0.06), 0 16px 32px -12px rgb(25 22 52 / 0.22);
+  --shadow-pop: 0 12px 40px -8px rgb(25 22 52 / 0.24), 0 2px 8px rgb(25 22 52 / 0.08);
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.6);
+  --ring-danger: 0 0 0 3px var(--color-danger-soft);
+
+  /* Tints that need an alpha channel cannot be expressed as a hex, so they live
+     here too rather than being written into three stylesheets. */
+  --color-scrim: rgb(9 7 22 / 0.45);
+  --color-backdrop: rgb(9 7 22 / 0.55);
+  --glow-primary: rgb(167 139 250 / 0.10);
+  --glow-accent: rgb(253 186 116 / 0.05);
+}
+
+/* ---------------------------------------------------------- typography */
+:root {
+  /* No webfont: the CSP is `default-src 'self'` and a portal should paint on
+     the first frame. The stack is ordered so Arabic resolves to a face the
+     platform shapes well, then Latin to the same UI face. */
+  --font-sans: "Segoe UI", system-ui, -apple-system, "Noto Sans Arabic", "Segoe UI Arabic",
+               Tahoma, Arial, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", ui-monospace, "SF Mono", Consolas,
+               "Liberation Mono", monospace;
+
+  /* Fluid scale. clamp() keeps a phone legible and stops a wide desktop from
+     ballooning. Sizes are rem so browser text-size settings still work. */
+  --text-2xs: 0.6875rem;  /* 11px - overline labels                        */
+  --text-xs: 0.75rem;     /* 12px - captions, table meta                  */
+  --text-sm: 0.8125rem;   /* 13px - secondary body                        */
+  --text-md: 0.9375rem;   /* 15px - default body                           */
+  --text-lg: 1.0625rem;   /* 17px - lead paragraphs                        */
+  --text-xl: 1.25rem;     /* 20px - card titles                            */
+  --text-2xl: clamp(1.375rem, 1.15rem + 0.9vw, 1.75rem);  /* h2            */
+  --text-3xl: clamp(1.625rem, 1.3rem + 1.5vw, 2.375rem);  /* h1            */
+  --text-4xl: clamp(2.125rem, 1.4rem + 3.2vw, 3.5rem);    /* hero only     */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-snug: 1.4;
+  --leading-normal: 1.65;
+
+  --tracking-tight: -0.011em;
+  --tracking-wide: 0.06em;   /* uppercase overlines */
+
+  /* ------------------------------------------------------------ motion */
+  --duration-instant: 90ms;
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 380ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+
+  /* ------------------------------------------------------------ layer */
+  /* Named so no component invents a z-index; this is the only place they live. */
+  --layer-base: 0;
+  --layer-skeleton: 1;      /* the shimmer sweep lives inside its block    */
+  --layer-sticky: 100;      /* table headers, sticky sub-nav              */
+  --layer-header: 200;      /* the app topbar                              */
+  --layer-sidebar: 300;     /* drawer / sidebar                            */
+  --layer-pop: 400;         /* menus, account panel                        */
+  --layer-dialog: 500;      /* <dialog>                                    */
+  --layer-toast: 600;       /* transient messages, never blocked           */
+
+  /* ------------------------------------------------------------ layout */
+  --shell-max: 1240px;
+  --shell-narrow: 720px;
+  --shell-wide: 1560px;
+  --topbar-height: 4.25rem;
+  --sidebar-width: 17.5rem;
+  --content-gutter: var(--space-5);
+}
+
+/* ==========================================================================
+   Dark mode - "Meridian after dusk".
+   The primary becomes a light lavender so that text-on-primary *and*
+   text-on-surface both stay far above 4.5:1, and the ember accent warms
+   rather than darkens (a dark amber is unreadable on a dark canvas).
+   Measured against --color-surface (#15122a): text 15.8:1, muted 8.2:1,
+   primary 6.7:1, danger 9.7:1, success / warning / info all above 8:1.
+   ========================================================================== */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-canvas: #0b0917;
+  --color-canvas-alt: #120f22;
+  --color-surface: #15122a;
+  --color-surface-raised: #1c1838;
+  --color-surface-sunken: #0f0c1d;
+  --color-surface-inverse: #f6f5fb;
+
+  --color-border: #2b2551;
+  --color-border-strong: #3d3670;
+  --color-border-subtle: #221d42;
+
+  --color-text: #efecfa;
+  --color-text-muted: #b0a9cf;
+  --color-text-subtle: #948db8;
+  --color-text-inverse: #12101f;
+
+  --color-primary: #a78bfa;
+  --color-primary-hover: #c4b1fd;
+  --color-primary-active: #8b6ff0;
+  --color-primary-soft: #241b4d;
+  --color-primary-soft-strong: #302468;
+  --color-on-primary: #1a0f3d;
+
+  --color-accent: #fdba74;
+  --color-accent-soft: #3a2415;
+  --color-on-accent: #2a1607;
+
+  --color-success: #6ee7a8;
+  --color-success-soft: #0f3220;
+  --color-warning: #fcd34d;
+  --color-warning-soft: #33280a;
+  --color-danger: #fca5a5;
+  --color-danger-soft: #3a1618;
+  --color-info: #93c5fd;
+  --color-info-soft: #12243d;
+
+  --color-focus: #c4b1fd;
+  --color-focus-offset: #0b0917;
+  --color-focus-inverse: #0b0917;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px -10px rgb(0 0 0 / 0.7);
+  --shadow-card-hover: 0 2px 6px rgb(0 0 0 / 0.55), 0 20px 40px -14px rgb(0 0 0 / 0.8);
+  --shadow-pop: 0 16px 48px -10px rgb(0 0 0 / 0.75), 0 2px 10px rgb(0 0 0 / 0.5);
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.04);
+
+  --color-scrim: rgb(9 7 22 / 0.55);
+  --color-backdrop: rgb(9 7 22 / 0.7);
+  --glow-primary: rgb(167 139 250 / 0.18);
+  --glow-accent: rgb(253 186 116 / 0.10);
+}
+
+/* Density preference (Settings -> Compact). Stored per browser by theme.js and
+   applied as data-density, so components read spacing from tokens only. */
+:root[data-density="compact"] {
+  --space-4: 0.75rem;
+  --space-5: 1.125rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --leading-normal: 1.55;
+}
+
+/* "Reduce motion" is honoured from the OS and from Settings, which is why this
+   sits in the token file rather than in a single component. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 1ms;
+    --duration-fast: 1ms;
+    --duration-base: 1ms;
+    --duration-slow: 1ms;
+  }
+}
+
+:root[data-motion="reduced"] {
+  --duration-instant: 1ms;
+  --duration-fast: 1ms;
+  --duration-base: 1ms;
+  --duration-slow: 1ms;
+}

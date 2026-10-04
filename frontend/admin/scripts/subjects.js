@@ -1,145 +1,89 @@
+﻿/**
+ * /admin/subjects/ - the subject catalogue.
+ *
+ * Subjects are the second half of a document's storage path, so their reference
+ * (slug) is fixed at creation. The edit dialog therefore shows the reference as a
+ * read-only fact rather than an input that would suggest it can change.
+ */
 import { bootAdmin } from '/shared/admin-layout.js';
-import { api } from '/shared/api.js';
-import { escapeHtml, mount, showMessage, toast, setLoading } from '/shared/ui.js';
-import { t, language, serverText, onLanguageChange } from '/shared/i18n.js';
+import { api, invalidateApi } from '/shared/api.js';
+import { escapeHtml, showMessage, setBusy, toast, confirmDialog } from '/shared/ui.js';
+import { t, serverText } from '/shared/i18n.js';
+import { permissions } from '/shared/session.js';
+import { createView } from '/shared/ui/view.js';
 
 const session = await bootAdmin({ active: 'subjects' });
-let subjects = [];
+if (!session) throw new Error('redirecting');
 
-/** Subjects carry both names; the page shows the one matching the active language. */
-function subjectLabel(subject) {
-  return language() === 'en' ? subject.nameEn || subject.nameAr : subject.nameAr || subject.nameEn;
-}
+const canManage = permissions().capabilities?.includes('subjectsManage');
 
-function render() {
-  mount(
-    '#subjectRows',
-    subjects.length
-      ? subjects
-          .map(
-            (subject) => `<tr>
-          <th scope="row"><span dir="ltr">${escapeHtml(subject.slug)}</span></th>
-          <td>${escapeHtml(subject.code || '-')}</td>
-          <td><span dir="ltr">${escapeHtml(subject.nameEn)}</span></td>
-          <td>${escapeHtml(subject.nameAr)}</td>
-          <td>${Number(subject.documentCount || 0)}</td>
-          <td>${
-            subject.active === false
-              ? `<span class="badge muted">${escapeHtml(t('state.archived'))}</span>`
-              : `<span class="badge ok">${escapeHtml(t('state.active'))}</span>`
-          }</td>
-          <td><div class="row-actions">
-            <button class="btn secondary small" type="button" data-edit-subject="${escapeHtml(subject.id)}">
-              ${escapeHtml(t('action.edit'))}
-            </button>
-            <button class="btn secondary small" type="button" data-toggle-active="${escapeHtml(subject.id)}" data-next="${subject.active === false ? 'true' : 'false'}">
-              ${subject.active === false ? escapeHtml(t('action.restore')) : escapeHtml(t('action.archive'))}
-            </button>
-            <button class="btn danger small" type="button" data-delete-subject="${escapeHtml(subject.id)}" data-name="${escapeHtml(subjectLabel(subject))}" data-count="${Number(subject.documentCount || 0)}">
-              ${escapeHtml(t('action.delete'))}
-            </button>
-          </div></td>
-        </tr>`
-          )
-          .join('')
-      : `<tr><td colspan="7" class="empty">${escapeHtml(t('msg.empty'))}</td></tr>`
-  );
-}
+const view = createView('#subjectRows', {
+  load: () => api.get('/api/admin/subjects'),
+  isEmpty: (data) => !(data?.subjects || []).length,
+  empty: { icon: 'book-open', titleKey: 'admin.noSubjects', bodyKey: 'admin.noSubjectsBody' },
+  render: (data) => `<div class="table-wrap">
+      <table class="table table--responsive">
+        <caption class="visually-hidden">${escapeHtml(t('admin.subjectList'))}</caption>
+        <thead>
+          <tr>
+            <th scope="col">${escapeHtml(t('field.nameEn'))}</th>
+            <th scope="col">${escapeHtml(t('field.nameAr'))}</th>
+            <th scope="col">${escapeHtml(t('field.code'))}</th>
+            <th scope="col">${escapeHtml(t('field.reference'))}</th>
+            <th scope="col">${escapeHtml(t('field.files'))}</th>
+            <th scope="col">${escapeHtml(t('field.status'))}</th>
+            ${canManage ? `<th scope="col">${escapeHtml(t('field.actions'))}</th>` : ''}
+          </tr>
+        </thead>
+        <tbody>
+          ${data.subjects
+            .map(
+              (subject) => `<tr>
+            <th scope="row" data-label="${escapeHtml(t('field.nameEn'))}">
+              <span class="table__primary">${escapeHtml(subject.nameEn)}</span>
+              ${subject.description ? `<small class="table__sub">${escapeHtml(subject.description)}</small>` : ''}
+            </th>
+            <td data-label="${escapeHtml(t('field.nameAr'))}" dir="auto">${escapeHtml(subject.nameAr || '-')}</td>
+            <td data-label="${escapeHtml(t('field.code'))}" dir="ltr">${escapeHtml(subject.code || '-')}</td>
+            <td data-label="${escapeHtml(t('field.reference'))}" dir="ltr"><code>${escapeHtml(subject.slug)}</code></td>
+            <td data-label="${escapeHtml(t('field.files'))}" class="numeric">${escapeHtml(String(subject.documentCount ?? 0))}</td>
+            <td data-label="${escapeHtml(t('field.status'))}">
+              <span class="badge ${subject.active === false ? 'badge--outline' : 'badge--success'}">${
+                escapeHtml(subject.active === false ? t('state.inactive') : t('state.active'))
+              }</span>
+            </td>
+            ${
+              canManage
+                ? `<td data-label="${escapeHtml(t('field.actions'))}">
+                    <div class="table__actions">
+                      <button class="btn btn--secondary btn--sm" type="button" data-edit="${escapeHtml(subject.id)}">
+                        ${escapeHtml(t('action.rename'))}</button>
+                      <button class="btn btn--danger btn--sm" type="button" data-delete-subject="${escapeHtml(subject.id)}"
+                              data-name="${escapeHtml(subject.nameEn)}">${escapeHtml(t('action.delete'))}</button>
+                    </div>
+                  </td>`
+                : ''
+            }
+          </tr>`
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>`,
+}).reload();
 
-async function loadSubjects() {
-  const data = await api.getQuiet('/api/admin/subjects');
-  subjects = data?.subjects || [];
-  render();
-}
-
-let editingId = '';
-const byId = (sid) => document.getElementById(sid);
-
-function openEditDialog(subject) {
-  editingId = subject.id;
-  byId('editSubjectCode').value = subject.code || '';
-  byId('editSubjectReference').value = subject.slug || '';
-  byId('editSubjectNameEn').value = subject.nameEn || '';
-  byId('editSubjectNameAr').value = subject.nameAr || '';
-  byId('editSubjectDescription').value = subject.description || '';
-  byId('editSubjectActive').checked = subject.active !== false;
-  showMessage('subjectEditMessage', '');
-  byId('subjectDialog').showModal();
-}
-
-byId('subjectEditCancel')?.addEventListener('click', () => byId('subjectDialog').close());
-
-byId('subjectEditForm')?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  if (!editingId) return;
-  const data = Object.fromEntries(new FormData(event.target).entries());
+document.getElementById('subjectRows').addEventListener('click', async (event) => {
+  const button = event.target.closest('button');
+  if (!button) return;
   try {
-    await api.patch(`/api/admin/subjects/${encodeURIComponent(editingId)}`, {
-      code: String(data.code || '').trim(),
-      nameEn: String(data.nameEn || '').trim(),
-      nameAr: String(data.nameAr || '').trim(),
-      description: String(data.description || '').trim(),
-      active: data.active === 'on',
-    });
-    byId('subjectDialog').close();
-    toast(t('msg.updated'), 'success');
-    await loadSubjects();
+    if (button.dataset.deleteSubject) {
+      if (!confirmDialog(t('msg.confirmDelete', { name: button.dataset.name }))) return;
+      await api.del(`/api/admin/subjects/${encodeURIComponent(button.dataset.deleteSubject)}`);
+      toast(t('msg.deleted'), 'success');
+      invalidateApi(['/api/admin/subjects', '/api/admin/documents']);
+      await view.reload();
+    }
   } catch (error) {
-    showMessage('subjectEditMessage', serverText(error.message), 'error');
+    showMessage('subjectMessage', serverText(error.message, { status: error.status }), 'error');
   }
 });
-
-if (session) {
-  await loadSubjects();
-  onLanguageChange(() => render());
-
-  const form = document.getElementById('subjectForm');
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    try {
-      await api.post('/api/admin/subjects', {
-        slug: String(data.slug || '').trim(),
-        code: String(data.code || '').trim(),
-        nameEn: String(data.nameEn || '').trim(),
-      });
-      form.reset();
-      showMessage('subjectFormMessage', t('msg.subjectCreated'), 'success');
-      await loadSubjects();
-    } catch (error) {
-      showMessage('subjectFormMessage', error.message, 'error');
-    }
-  });
-
-  document.getElementById('subjectRows').addEventListener('click', async (event) => {
-    const button = event.target.closest('button');
-    if (!button) return;
-    try {
-      if (button.dataset.toggleActive) {
-        await api.patch(`/api/admin/subjects/${encodeURIComponent(button.dataset.toggleActive)}`, {
-          active: button.dataset.next === 'true',
-        });
-        toast(t('msg.updated'), 'success');
-        await loadSubjects();
-        return;
-      }
-      if (button.dataset.editSubject) {
-        const subject = subjects.find((item) => item.id === button.dataset.editSubject);
-        if (subject) openEditDialog(subject);
-        return;
-      }
-      if (button.dataset.deleteSubject) {
-        if (Number(button.dataset.count) > 0) {
-          showMessage('subjectMessage', t('server.subjectNotEmpty'), 'error');
-          return;
-        }
-        if (!window.confirm(`${t('action.delete')}: ${button.dataset.name}?`)) return;
-        await api.del(`/api/admin/subjects/${encodeURIComponent(button.dataset.deleteSubject)}`);
-        toast(t('msg.updated'), 'success');
-        await loadSubjects();
-      }
-    } catch (error) {
-      showMessage('subjectMessage', error.message, 'error');
-    }
-  });
-}

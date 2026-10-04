@@ -1,42 +1,53 @@
+﻿/** /admin/information/ - the site copy shown on the public pages. */
 import { bootAdmin } from '/shared/admin-layout.js';
-import { api } from '/shared/api.js';
-import { showMessage, setBusy } from '/shared/ui.js';
+import { api, invalidateApi } from '/shared/api.js';
+import { showMessage, setBusy, toast } from '/shared/ui.js';
 import { t, serverText } from '/shared/i18n.js';
 
 const session = await bootAdmin({ active: 'information' });
+if (!session) throw new Error('redirecting');
 
-const fields = {
-  title: document.getElementById('infoTitle'),
-  tagline: document.getElementById('infoTagline'),
-  about: document.getElementById('infoAbout'),
-  notice: document.getElementById('infoNotice'),
-  academicYear: document.getElementById('infoYear'),
-};
 const form = document.getElementById('infoForm');
-const submitButton = form.querySelector('button[type="submit"]');
+const FIELDS = {
+  infoTitle: 'title',
+  infoTagline: 'tagline',
+  infoYear: 'academicYear',
+  infoNotice: 'notice',
+  infoAbout: 'about',
+};
 
-async function loadInfo() {
-  const data = await api.getQuiet('/api/admin/info');
-  const info = data?.info;
-  if (!info) return showMessage('infoMessage', t('msg.dataLoadFailed'), 'error');
-  for (const [key, input] of Object.entries(fields)) input.value = info[key] || '';
+function paint(info) {
+  for (const [id, key] of Object.entries(FIELDS)) {
+    const input = document.getElementById(id);
+    if (input) input.value = info?.[key] || '';
+  }
+  const lead = document.getElementById('infoLead');
+  if (lead) lead.textContent = t('admin.siteDataNote');
 }
 
-if (session) {
-  await loadInfo();
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    setBusy(submitButton, true, t('msg.saving'));
-    try {
-      const payload = {};
-      for (const [key, input] of Object.entries(fields)) payload[key] = input.value.trim();
-      await api.put('/api/admin/info', payload);
-      showMessage('infoMessage', t('msg.dataSaved'), 'success');
-    } catch (error) {
-      showMessage('infoMessage', serverText(error.message, { status: error.status }), 'error');
-    } finally {
-      setBusy(submitButton, false);
-    }
-  });
+try {
+  paint(await api.get('/api/admin/info'));
+} catch (error) {
+  showMessage('infoMessage', serverText(error.message, { status: error.status }), 'error');
 }
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = form.querySelector('button[type="submit"]');
+  const payload = Object.fromEntries(Object.entries(FIELDS).map(([id, key]) => [key, document.getElementById(id).value]));
+
+  setBusy(button, true, t('msg.saving'));
+  showMessage('infoMessage', '');
+  try {
+    const result = await api.put('/api/admin/info', payload);
+    /* The public pages read /api/public/site, so that read is now stale. */
+    invalidateApi(['/api/public/site', '/api/admin/info']);
+    paint(result.info || payload);
+    showMessage('infoMessage', t('msg.saved'), 'success');
+    toast(t('msg.saved'), 'success');
+  } catch (error) {
+    showMessage('infoMessage', serverText(error.message, { status: error.status }), 'error');
+  } finally {
+    setBusy(button, false);
+  }
+});

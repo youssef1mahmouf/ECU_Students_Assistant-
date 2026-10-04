@@ -3,112 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>الملفات · بوابة المجموعات</title>
+  <title>إدارة الملفات</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.documentsAdmin">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="admin.documents">الملفات</p>
-      <h1 data-i18n="admin.documentsManage">إدارة الملفات</h1>
-      <p class="subtext" id="documentsLead" data-i18n="admin.documentsNote">صور و PDF فقط. تُخزَّن الملفات في مجلدات آمنة داخل الخادم وتُخدم من خلال مسار التحقق من الصلاحية.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <div class="field inline">
-        <label for="documentGroup" data-i18n="field.group">المجموعة</label>
-        <select id="documentGroup"></select>
-        <label for="documentSubject" data-i18n="field.subject">المادة</label>
-        <select id="documentSubject"></select>
-        <button class="btn secondary small" type="button" id="documentRefresh" data-i18n="action.refresh">تحديث</button>
-      </div>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
 
-      <div class="table-wrap">
-        <table>
-          <caption id="documentsCaption" data-i18n="admin.documentList">قائمة الملفات</caption>
-          <thead>
-            <tr>
-              <th scope="col" data-i18n="field.fileName">اسم الملف</th>
-              <th scope="col" data-i18n="field.group">المجموعة</th>
-              <th scope="col" data-i18n="field.subject">المادة</th>
-        <th scope="col" data-i18n="field.folder">المجلد</th>
-              <th scope="col" data-i18n="field.size">الحجم</th>
-              <th scope="col" data-i18n="field.status">الحالة</th>
-              <th scope="col" data-i18n="field.uploadedBy">رفعه</th>
-              <th scope="col" data-i18n="field.actions">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="documentRows">
-            <tr><td colspan="7" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="message" id="documentMessage" role="status" aria-live="polite"></p>
-    </section>
+      <main class="page" id="main">
 
-    <section class="surface" aria-labelledby="upload-heading">
-      <h2 id="upload-heading" data-i18n="package.uploadTitle">رفع حزمة محاضرة</h2>
-      <p class="subtext" data-i18n="package.uploadHint">أنشئ أسبوعًا ومحاضرة، ثم أرفق ما تحتاجه فقط. كل ملف اختياري ويمكن اختيار أكثر من ملف.</p>
-      <form id="uploadForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="uploadGroup" data-i18n="field.groups">المجموعة</label>
-            <select id="uploadGroup" name="groups" multiple size="4" required></select>
-            <span class="hint" data-i18n="field.multiSelectHint">اختيار متعدد: Ctrl (أو Cmd) لتحديد أكثر من قيمة.</span>
-          </div>
-          <div class="field">
-            <label for="uploadSubject" data-i18n="field.subject">المادة</label>
-            <select id="uploadSubject" name="subject" required></select>
-          </div>
-          <div class="field">
-            <label for="uploadWeek" data-i18n="package.week">الأسبوع</label>
-            <input id="uploadWeek" name="weekNumber" type="number" min="1" max="60" value="1" required>
-          </div>
-          <div class="field">
-            <label for="uploadKind" data-i18n="package.sessionKind">النوع</label>
-            <select id="uploadKind" name="sessionKind" required>
-              <option value="lecture" data-i18n="kind.lecture">محاضرة</option>
-              <option value="tutorial" data-i18n="kind.tutorial">تمارين</option>
-              <option value="lab" data-i18n="kind.lab">معمل</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="uploadLecture" data-i18n="package.session">رقم الجلسة</label>
-            <input id="uploadLecture" name="lectureNumber" type="number" min="1" max="30" value="1" required>
-          </div>
-          <div class="field">
-            <label for="uploadTitle" data-i18n="package.title">عنوان الحزمة</label>
-            <input id="uploadTitle" name="title" maxlength="140" placeholder="Lecture 1" data-i18n-placeholder="package.titlePlaceholder">
-          </div>
-          <div class="field full">
-            <label for="uploadNotes" data-i18n="package.notes">ملاحظات المحاضرة</label>
-            <textarea id="uploadNotes" name="notes" rows="4" maxlength="4000"></textarea>
-          </div>
-          <div class="field full">
-            <label for="uploadFiles" data-i18n="package.attachments">المرفقات الاختيارية</label>
-            <input id="uploadFiles" name="files" type="file" multiple accept=".pdf,.doc,.docx,.mp4,.mov,.webm,.mp3,.m4a,.wav,.ogg">
-            <span class="hint" data-i18n="package.fileHint">يمكن اختيار فيديو أو تسجيل صوتي أو PDF أو Word، أو ترك الملفات فارغة وإضافة الملاحظات فقط.</span>
-          </div>
-          <div class="field full">
-            <label class="check" for="uploadPublished">
-              <input id="uploadPublished" name="published" type="checkbox">
-              <span data-i18n="field.publishedToStudents">متاح للطلاب</span>
-            </label>
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.documents">الملفات</p>
+            <h1 data-i18n="admin.documentsManage">إدارة الملفات</h1>
+            <p class="lead" id="documentsLead" data-i18n="admin.documentsNote">صور و PDF فقط. تُخزَّن الملفات في مجلدات آمنة داخل الخادم وتُخدم بعد التحقق من الصلاحية.</p>
           </div>
         </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="uploadSubmit" data-i18n="action.uploadToFolders">رفع في المجلدات</button>
-        </div>
-        <p class="message" id="uploadMessage" role="status" aria-live="polite"></p>
-        <div id="uploadSaved" aria-live="polite"></div>
-      </form>
-    </section>
-  </main>
 
-  <footer class="shell" id="appFooter"></footer>
+        <div class="toolbar">
+          <div class="field">
+            <label class="label" for="documentGroup" data-i18n="field.group">المجموعة</label>
+            <select class="control" id="documentGroup"></select>
+          </div>
+          <div class="field">
+            <label class="label" for="documentSubject" data-i18n="field.subject">المادة</label>
+            <select class="control" id="documentSubject"></select>
+          </div>
+          <span class="toolbar__spacer"></span>
+          <span class="count-pill" id="documentCount">0</span>
+        </div>
+
+        <!-- id="documentRows" is asserted by backend/scripts/page-smoke.js -->
+        <div id="documentRows"></div>
+        <p class="message" id="documentMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+
+        <section class="page__section" aria-labelledby="upload-heading">
+          <h2 id="upload-heading" data-i18n="package.uploadTitle">رفع ملف</h2>
+          <form id="uploadForm">
+            <div class="form-grid">
+              <div class="field field--full">
+                <label class="label" for="uploadGroup" data-i18n="field.groups">المجموعة</label>
+                <select class="control" id="uploadGroup" name="groups" multiple size="4" required></select>
+              </div>
+              <div class="field">
+                <label class="label" for="uploadSubject" data-i18n="field.subject">المادة</label>
+                <select class="control" id="uploadSubject" name="subject" required></select>
+              </div>
+              <div class="field">
+                <label class="label" for="uploadWeek" data-i18n="package.week">الأسبوع</label>
+                <input class="control" id="uploadWeek" name="weekNumber" type="number" min="1" max="60" value="1" required>
+              </div>
+              <div class="field">
+                <label class="label" for="uploadKind" data-i18n="package.sessionKind">النوع</label>
+                <select class="control" id="uploadKind" name="sessionKind" required>
+                  <option value="lecture" data-i18n="kind.lecture">محاضرة</option>
+                  <option value="tutorial" data-i18n="kind.tutorial">تمارين</option>
+                  <option value="lab" data-i18n="kind.lab">معمل</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="uploadLecture" data-i18n="package.session">رقم الجلسة</label>
+                <input class="control" id="uploadLecture" name="lectureNumber" type="number" min="1" max="30" value="1" required>
+              </div>
+              <div class="field">
+                <label class="label" for="uploadTitle" data-i18n="package.title">عنوان الملف</label>
+                <input class="control" id="uploadTitle" name="displayName" maxlength="140"
+                       data-i18n-placeholder="package.titlePlaceholder">
+              </div>
+
+              <!-- A real <label> over a real file input, so the picker opens on
+                   click and on Enter; drag-and-drop is layered on top. -->
+              <div class="field field--full">
+                <span class="label" data-i18n="package.attachments">الملفات</span>
+                <label class="dropzone" id="uploadDropzone" for="uploadFiles">
+                  <span class="dropzone__icon">
+                    <svg viewBox="0 0 24 24" width="1.35rem" height="1.35rem" aria-hidden="true" focusable="false">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <path d="M17 8l-5-5-5 5"></path><path d="M12 3v12"></path>
+                    </svg>
+                  </span>
+                  <span class="dropzone__title" data-i18n="package.dropTitle">اختر ملفات أو أفلتها هنا</span>
+                  <span class="dropzone__hint" data-i18n="package.fileHint">PDF أو Word أو فيديو أو تسجيل صوتي.</span>
+                  <input id="uploadFiles" name="files" type="file" multiple
+                         accept=".pdf,.doc,.docx,.mp4,.mov,.webm,.mp3,.m4a,.wav,.ogg">
+                  <ul class="dropzone__files" id="uploadFileList"></ul>
+                </label>
+              </div>
+
+              <div class="field field--full">
+                <label class="check">
+                  <input type="checkbox" name="published">
+                  <span data-i18n="field.publishedToStudents">متاح للطلاب</span>
+                </label>
+              </div>
+            </div>
+            <div class="cluster" style="margin-block-start:var(--space-4)">
+              <button class="btn btn--primary" type="submit" id="uploadSubmit" data-i18n="action.uploadToFolders">
+                رفع في المجلدات</button>
+            </div>
+            <p class="message" id="uploadMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+            <div id="uploadSaved" aria-live="polite" style="margin-block-start:var(--space-3)"></div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/documents.js"></script>
 </body>
 </html>

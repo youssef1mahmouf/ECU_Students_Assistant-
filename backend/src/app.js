@@ -23,21 +23,45 @@ const { readerRouter: documentReaderRoutes, managerRouter: documentManagerRoutes
 const { logPageVisit } = require('./services/activity');
 
 /* Admin page -> the capability the permission matrix requires (null = any staff role).
-   Keep in step with frontend/shared/layout.js navigation. */
+   Keep in step with the `cap` fields in frontend/shared/nav.js: the navigation hides
+   what the server would refuse, and these guards are what actually refuse it. The
+   2026 redesign added four pages (library, notifications, security, health); each
+   one reuses an existing capability rather than inventing a new one, so no role
+   gained or lost access to anything.
+     /library         browses the shared material index -> documentsView
+     /notifications   the security-prioritised activity feed -> dashboard
+     /security        the sign-in and security event log -> activityView
+     /health          GET /api/health, already public, filtered to staff here
+     /settings        display preferences only; every staff role may open it   */
 const ADMIN_PAGES = {
   '/dashboard': 'dashboard',
+  '/notifications': 'dashboard',
+  '/health': 'dashboard',
+  '/activity': 'activityView',
+  '/security': 'activityView',
   '/groups': 'groupsView',
   '/accounts': 'accountsView',
   '/subjects': 'subjectsManage',
+  '/library': 'documentsView',
   '/documents': 'documentsView',
-  '/activity': 'activityView',
   '/information': 'reportsView',
   '/problems': 'problemsView',
   '/profile': null, // every staff role may open its own profile
+  '/settings': null,
 };
-const USER_PAGES = ['/profile', '/groups', '/documents', '/report'];
+/* Student pages. /library and /viewer added by the redesign: the explorer and the
+   in-app viewer both read data the server already scopes to the caller's own
+   group, so they sit behind the same sign-in gate as the pages they replace. */
+const USER_PAGES = ['/profile', '/groups', '/documents', '/report', '/library', '/viewer', '/notifications', '/settings'];
 /* Public documents whose visits are recorded when a session exists. */
-const PUBLIC_PAGES = new Set(['/', '/guest/', '/guest/assessments/', '/user/', '/user/signin/', '/user/register/']);
+const PUBLIC_PAGES = new Set([
+  '/',
+  '/guest/',
+  '/guest/assessments/',
+  '/user/',
+  '/user/signin/',
+  '/user/register/',
+]);
 
 const simplePage = (status, title, message, links = '') => `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">

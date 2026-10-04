@@ -3,39 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>المعلومات · بوابة المجموعات</title>
+  <title>معلومات الموقع</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.information">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="admin.information">المعلومات</p>
-      <h1 data-i18n="admin.siteData">بيانات الموقع</h1>
-      <p class="subtext" data-i18n="admin.siteDataNote">هذه الحقول تظهر في الصفحة العامة وصفحة التقييمات.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <form id="infoForm">
-        <div class="form-grid">
-          <div class="field"><label for="infoTitle" data-i18n="field.title">العنوان</label><input id="infoTitle" maxlength="120" required></div>
-          <div class="field"><label for="infoTagline" data-i18n="field.tagline">الوصف المختصر</label><input id="infoTagline" maxlength="160"></div>
-          <div class="field"><label for="infoYear" data-i18n="field.academicYear">العام الدراسي</label><input id="infoYear" maxlength="40"></div>
-          <div class="field"><label for="infoNotice" data-i18n="field.notice">الإشعار</label><input id="infoNotice" maxlength="400"></div>
-          <div class="field full"><label for="infoAbout" data-i18n="field.about">عن البوابة</label><textarea id="infoAbout" maxlength="1200"></textarea></div>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="admin.information">المعلومات</p>
+            <h1 data-i18n="admin.siteData">بيانات الموقع</h1>
+            <p class="lead" id="infoLead" data-i18n="admin.siteDataNote">هذه الحقول تظهر في الصفحة العامة وصفحة التقييمات.</p>
+          </div>
         </div>
-        <div class="actions">
-          <button class="btn" type="submit" data-i18n="action.save">حفظ</button>
-          <a class="btn secondary" href="/guest/assessments/" data-i18n="action.previewAssessments">معاينة صفحة التقييمات</a>
-        </div>
-        <p class="message" id="infoMessage" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-  </main>
 
-  <footer class="shell" id="appFooter"></footer>
+        <div class="card">
+          <!-- id="infoForm" is asserted by backend/scripts/page-smoke.js -->
+          <form id="infoForm">
+            <div class="form-grid">
+              <div class="field">
+                <label class="label" for="infoTitle" data-i18n="field.title">العنوان</label>
+                <input class="control" id="infoTitle" maxlength="120" required>
+              </div>
+              <div class="field">
+                <label class="label" for="infoTagline" data-i18n="field.tagline">الوصف المختصر</label>
+                <input class="control" id="infoTagline" maxlength="160">
+              </div>
+              <div class="field">
+                <label class="label" for="infoYear" data-i18n="field.academicYear">العام الدراسي</label>
+                <input class="control" id="infoYear" maxlength="40">
+              </div>
+              <div class="field">
+                <label class="label" for="infoNotice" data-i18n="field.notice">الإشعار</label>
+                <input class="control" id="infoNotice" maxlength="400">
+              </div>
+              <div class="field field--full">
+                <label class="label" for="infoAbout" data-i18n="field.about">عن البوابة</label>
+                <textarea class="control" id="infoAbout" maxlength="1200"></textarea>
+              </div>
+            </div>
+            <div class="cluster" style="margin-block-start:var(--space-4)">
+              <button class="btn btn--primary" type="submit" data-i18n="action.save">حفظ</button>
+              <a class="btn btn--secondary" href="/guest/assessments/" data-i18n="action.previewAssessments">
+                معاينة صفحة التقييمات</a>
+            </div>
+            <p class="message" id="infoMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+          </form>
+        </div>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/information.js"></script>
 </body>
 </html>

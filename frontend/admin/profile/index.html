@@ -3,72 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>الملف الشخصي · بوابة المجموعات</title>
+  <title>حسابي</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
-<body data-page-title="title.profile">
+<body data-page-title="title.adminProfile">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface profile-head">
-      <div class="avatar" id="profileAvatar" aria-hidden="true">··</div>
-      <div>
-        <h1 id="profileName" data-i18n="profile.title">الملف الشخصي</h1>
-        <p class="subtext" id="profileMeta" data-i18n="profile.subtext">بيانات الحساب وكلمة المرور.</p>
-      </div>
-    </section>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-    <section class="surface" aria-labelledby="name-heading">
-      <h2 id="name-heading" data-i18n="profile.details">بيانات الحساب</h2>
-      <form id="profileForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="profileInputName" data-i18n="field.name">الاسم</label>
-            <input id="profileInputName" name="name" maxlength="80" required>
-          </div>
-          <div class="field">
-            <label for="profileEmail" data-i18n="field.email">البريد الإلكتروني</label>
-            <input id="profileEmail" name="email" type="email" disabled>
-          </div>
-          <div class="field full">
-            <label for="profileRosterName" data-i18n="profile.rosterName">الاسم الكامل في القائمة الرسمية</label>
-            <input id="profileRosterName" type="text" disabled>
-            <span class="hint" data-i18n="profile.rosterNote">الاسم كما ورد في ملف المجموعة المعتمد، ولا يتغيّر من هنا.</span>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.profile">الملف الشخصي</p>
+            <h1 data-i18n="profile.title">ملفي</h1>
+            <p class="lead" data-i18n="profile.subtitle">بياناتك كما يراها النظام. الاسم فقط قابل للتعديل.</p>
           </div>
         </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="profileSubmit" data-i18n="action.save">حفظ</button>
-        </div>
-        <p class="message" id="profileMessage" role="status" aria-live="polite"></p>
-      </form>
-    </section>
 
-    <section class="surface" aria-labelledby="password-heading">
-      <h2 id="password-heading" data-i18n="profile.changePassword">تغيير كلمة المرور</h2>
-      <p class="subtext" data-i18n="profile.passwordHint">سيتم إغلاق الجلسات في الأجهزة الأخرى بعد التغيير.</p>
-      <form id="passwordForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="currentPassword" data-i18n="field.currentPassword">كلمة المرور الحالية</label>
-            <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
-          </div>
-          <div class="field">
-            <label for="newPassword" data-i18n="field.newPassword">كلمة المرور الجديدة</label>
-            <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" required>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="passwordSubmit" data-i18n="action.changePassword">تغيير كلمة المرور</button>
-        </div>
-        <p class="message" id="passwordMessage" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-  </main>
+        <section class="card" aria-labelledby="identity-heading">
+          <h2 class="card__title" id="identity-heading" data-i18n="profile.details">بيانات الحساب</h2>
+          <div class="definition-grid" id="identityFacts"></div>
+        </section>
 
-  <footer class="shell" id="appFooter"></footer>
+        <section class="page__section" aria-labelledby="name-heading">
+          <div class="card">
+            <h2 class="card__title" id="name-heading" data-i18n="profile.details">تعديل الاسم</h2>
+            <!-- id="profileForm" is asserted by backend/scripts/page-smoke.js -->
+            <form id="profileForm">
+              <div class="field">
+                <label class="label" for="profileInputName" data-i18n="field.name">الاسم</label>
+                <input class="control" id="profileInputName" name="name" maxlength="80" required>
+              </div>
+              <div class="cluster" style="margin-block-start:var(--space-4)">
+                <button class="btn btn--primary" type="submit" id="profileSubmit" data-i18n="action.save">حفظ</button>
+              </div>
+              <p class="message" id="profileMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+            </form>
+          </div>
+        </section>
+
+        <section class="page__section" aria-labelledby="password-heading">
+          <div class="card">
+            <h2 class="card__title" id="password-heading" data-i18n="profile.changePassword">تغيير كلمة المرور</h2>
+            <form id="passwordForm" autocomplete="off">
+              <div class="form-grid">
+                <div class="field">
+                  <label class="label" for="currentPassword" data-i18n="field.currentPassword">كلمة المرور الحالية</label>
+                  <input class="control" id="currentPassword" name="currentPassword" type="password"
+                         autocomplete="current-password" required>
+                </div>
+                <div class="field">
+                  <label class="label" for="newPassword" data-i18n="field.newPassword">كلمة المرور الجديدة</label>
+                  <input class="control" id="newPassword" name="newPassword" type="password"
+                         autocomplete="new-password" minlength="8" required>
+                  <span class="hint" data-i18n="profile.passwordHint">سيتم إغلاق الجلسات الأخرى.</span>
+                </div>
+              </div>
+              <div class="cluster" style="margin-block-start:var(--space-4)">
+                <button class="btn btn--primary" type="submit" id="passwordSubmit" data-i18n="action.changePassword">
+                  تغيير كلمة المرور</button>
+              </div>
+              <p class="message" id="passwordMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/profile.js"></script>
 </body>
 </html>

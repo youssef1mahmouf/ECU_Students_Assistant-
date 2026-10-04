@@ -1,46 +1,47 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>التقييمات المعلنة · بوابة المجموعات</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <title data-i18n="title.assessments">التقييمات المعلنة</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/guest/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.assessments">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="guest.publicEyebrow">Public information</p>
-      <h1 data-i18n="guest.assessments">التقييمات المعلنة</h1>
-      <p class="subtext" data-i18n="guest.assessmentsNote">كل ما هو مسموح للزوار بمشاهدته. تفاصيل المجموعة الكاملة تتطلب تسجيل الدخول والاعتماد.</p>
-      <div class="banner info" id="siteNotice" hidden></div>
-      <div class="table-wrap">
-        <table>
-          <caption data-i18n="guest.assessmentsCaption">جدول التقييمات المعلنة</caption>
-          <thead>
-            <tr>
-              <th scope="col" data-i18n="field.title">العنوان</th>
-              <th scope="col" data-i18n="field.group">المجموعة</th>
-              <th scope="col" data-i18n="field.kind">النوع</th>
-              <th scope="col" data-i18n="field.dueDate">تاريخ التسليم</th>
-            </tr>
-          </thead>
-          <tbody id="assessmentRows">
-            <tr><td colspan="4" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="actions">
-        <a class="btn" href="/user/signin/" data-i18n="action.signInContent">تسجيل الدخول للوصول للمحتوى</a>
-        <a class="btn secondary" href="/user/" data-i18n="action.backHome">العودة للرئيسية</a>
-      </div>
-    </section>
-  </main>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-  <footer class="shell" id="appFooter"></footer>
+    <div class="app__body app__body--no-nav">
+      <main class="page shell shell--narrow" id="main">
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="guest.publicEyebrow">Public information</p>
+            <h1 data-i18n="guest.assessments">التقييمات المعلنة</h1>
+            <p class="lead" data-i18n="guest.assessmentsNote">كل ما هو مسموح للزوار بمشاهدته.</p>
+          </div>
+        </div>
+
+        <div id="siteNotice"></div>
+
+        <div id="assessmentTable"></div>
+
+        <div class="cluster">
+          <a class="btn btn--primary" href="/user/signin/" data-i18n="action.signInContent">تسجيل الدخول للوصول للمحتوى</a>
+          <a class="btn btn--secondary" href="/" data-i18n="action.backHome">العودة للرئيسية</a>
+        </div>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/guest/scripts/assessments.js"></script>
 </body>
 </html>

@@ -1,0 +1,439 @@
+﻿/* ==========================================================================
+   The ECU app frame.
+
+   One frame for every signed-in page in both areas: a sticky topbar and a
+   sidebar that is a persistent column on desktop and an off-canvas drawer on a
+   phone. Guest pages opt out by simply not rendering <aside class="sidebar">;
+   they keep the same topbar, so the brand never jumps between pages.
+   ========================================================================== */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ---------------------------------------------------------------- topbar */
+.topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--layer-header);
+  border-block-end: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  /* Without the filter the bar would be see-through, so fall back to solid. */
+  .topbar { background: var(--color-surface); }
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--topbar-height);
+  width: min(100% - (var(--content-gutter) * 2), var(--shell-wide));
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------- brand */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: var(--color-text);
+  text-decoration: none;
+  /* Shrinkable, or a long brand name would push the action group off a phone.
+     The name inside already truncates, so shrinking never causes a wrap. */
+  flex: 0 1 auto;
+}
+
+.brand:hover {
+  color: var(--color-text);
+}
+
+/* The one piece of pure decoration in the app: a violet lozenge holding the ECU
+   monogram, drawn from the primary token so it re-themes automatically. */
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(140deg, var(--color-primary), var(--color-primary-active));
+  color: var(--color-on-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  box-shadow: var(--shadow-card);
+  flex: none;
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.brand__name {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand__tag {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- topnav */
+/* The primary navigation. On a wide screen it lives in the bar; below the
+   breakpoint it moves into the drawer with the rest of the sidebar. */
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: var(--space-2);
+  min-width: 0;
+}
+
+.topnav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.topnav__link svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.topnav__link:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}
+
+.topnav__link[aria-current="page"] {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: auto;
+  /* The controls never shrink: they are what must stay reachable on a phone. */
+  flex: none;
+}
+
+/* The language control carries the name of the OTHER language, which is a word
+   rather than a glyph, so it is a pill and not a square icon button. */
+.language-button {
+  min-width: 4.75rem;
+  height: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.language-button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* The sidebar toggle is only meaningful below the layout breakpoint, so it is
+   hidden until then rather than shown and inert. */
+.nav-toggle {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .topnav { display: none; }
+  .nav-toggle { display: inline-grid; }
+}
+
+/* ------------------------------------------------------------- sidebar */
+.app__body {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  flex: 1 1 auto;
+  width: min(100% - (var(--content-gutter) * 2), var(--shell-wide));
+  margin-inline: auto;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.app__body--no-nav {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  inset-block-start: calc(var(--topbar-height) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-height: calc(100dvh - var(--topbar-height) - var(--space-6));
+  padding-block: var(--space-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar__heading {
+  padding: 0 var(--space-3) var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.sidebar__link svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--color-text-subtle);
+  flex: none;
+}
+
+.sidebar__link:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}
+
+.sidebar__link:hover svg {
+  color: var(--color-primary);
+}
+
+/* Current page: a filled chip, a coloured icon and a heavier weight - three
+   signals, so it survives greyscale and colour-blindness. */
+.sidebar__link[aria-current="page"] {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.sidebar__link[aria-current="page"] svg {
+  color: var(--color-primary);
+}
+
+.sidebar__trailing {
+  margin-inline-start: auto;
+}
+
+/* ------------------------------------------------------------ page area */
+.page {
+  min-width: 0;
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.page__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-block-start: var(--space-6);
+}
+
+.page__section:first-child {
+  margin-block-start: 0;
+}
+
+/* ------------------------------------------------------------- footer */
+.footer {
+  margin-block-start: auto;
+  border-block-start: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-5);
+  width: min(100% - (var(--content-gutter) * 2), var(--shell-wide));
+  margin-inline: auto;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+/* ----------------------------------------------------------- drawer mode */
+@media (max-width: 1080px) {
+  .app__body,
+  .app__body--no-nav {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* The sidebar becomes an off-canvas drawer. It stays in the DOM - so links are
+     reachable by screen reader and by Tab - but is moved out of view until open. */
+  .sidebar {
+    position: fixed;
+    inset-block: var(--topbar-height) 0;
+    inset-inline-start: 0;
+    z-index: var(--layer-sidebar);
+    width: min(20rem, 84vw);
+    max-height: none;
+    padding: var(--space-4);
+    border-inline-end: 1px solid var(--color-border);
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-pop);
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform var(--duration-base) var(--ease-out),
+                visibility var(--duration-base);
+  }
+
+  [dir="rtl"] .sidebar {
+    transform: translateX(105%);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  /* Scrim: a sibling of the drawer, inert and non-focusable, so it can never end
+     up as an unreachable element in the tab order. */
+  .nav-scrim {
+    position: fixed;
+    inset: var(--topbar-height) 0 0;
+    z-index: calc(var(--layer-sidebar) - 1);
+    background: var(--color-scrim);
+    animation: scrim-in var(--duration-base) var(--ease-out) both;
+  }
+
+  .nav-scrim[hidden] {
+    display: none;
+  }
+
+  .page {
+    padding-block: var(--space-5) var(--space-7);
+  }
+}
+
+@keyframes scrim-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
+
+/* Below the phone breakpoint the page gutter tightens so a 320px screen still
+   has usable content width. */
+/* The bar is the one row that must never scroll sideways. At phone widths the
+   space between the controls gives way first; the controls keep their size. */
+@media (max-width: 700px) {
+  :root {
+    --content-gutter: var(--space-4);
+  }
+
+  .topbar__inner {
+    gap: var(--space-2);
+  }
+
+  .topbar__actions {
+    gap: 2px;
+  }
+
+  /* Below this width the mark alone identifies the product; the wordmark would
+     only be truncated to nothing while squeezing the controls that matter. */
+  .brand__text {
+    display: none;
+  }
+
+  /* The avatar still identifies the account; the name is what will not fit. */
+  .account-name {
+    display: none;
+  }
+
+  .language-button {
+    min-width: 0;
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
+  }
+
+  .avatar {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+  :root {
+    --content-gutter: var(--space-4);
+  }
+
+  .topbar__inner {
+    gap: var(--space-2);
+  }
+
+  /* Below this width the mark alone identifies the product; the wordmark would
+     only be truncated to nothing while squeezing the controls that matter. */
+  .brand__text {
+    display: none;
+  }
+
+  .language-button {
+    min-width: 3.75rem;
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
+  }

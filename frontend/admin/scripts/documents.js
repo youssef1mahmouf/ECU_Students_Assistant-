@@ -1,198 +1,286 @@
+﻿/**
+ * /admin/documents/ - upload and manage the files uploaded for a group.
+ *
+ * The upload target is a real <label> over a real file input (see the markup), so
+ * it works with a click, with Enter and with drag-and-drop. Every chosen file is
+ * sent individually because the server decides the destination folder from each
+ * file's content type; the response lists exactly where each one landed, so a
+ * multi-file upload is never a silent success.
+ */
 import { bootAdmin } from '/shared/admin-layout.js';
-import { api } from '/shared/api.js';
-import { escapeHtml, mount, showMessage, setBusy, toast } from '/shared/ui.js';
-import { t, language, serverText } from '/shared/i18n.js';
+import { api, invalidateApi } from '/shared/api.js';
+import { escapeHtml, formatBytes, formatDate, showMessage, setBusy, toast, confirmDialog } from '/shared/ui.js';
+import { t, serverText, language } from '/shared/i18n.js';
+import { createView } from '/shared/ui/view.js';
+import { documentViewerHref } from '/shared/data/library.js';
 
 const session = await bootAdmin({ active: 'documents' });
+if (!session) throw new Error('redirecting');
 
-let groups = [];
-let subjects = [];
 let documents = [];
+let subjects = [];
 
-const byId = (id) => document.getElementById(id);
+const groupSelect = document.getElementById('documentGroup');
+const subjectFilter = document.getElementById('documentSubject');
 
-/** Every group a document belongs to (legacy single value included). */
-function documentGroupNames(document) {
-  const names = Array.isArray(document.groups) && document.groups.length ? document.groups : [document.group].filter(Boolean);
-  return names.join(', ') || '-';
-}
 const subjectLabel = (subject) =>
   (language() === 'en' ? subject.nameEn || subject.nameAr : subject.nameAr || subject.nameEn) || subject.slug;
 
-function formatBytes(size) {
-  const bytes = Number(size || 0);
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+/** base64 in chunks: a large video blows the call stack if converted in one go. */
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(t('msg.readFailed')));
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
-function fillSelect(select, options, allLabel) {
-  if (!select) return;
-  select.innerHTML = `${allLabel ? `<option value="">${escapeHtml(allLabel)}</option>` : ''}${options
-    .map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`)
-    .join('')}`;
+function visible() {
+  const group = groupSelect?.value || '';
+  const subject = subjectFilter?.value || '';
+  return documents.filter((row) => {
+    if (group && !(row.groups || [row.group]).includes(group)) return false;
+    if (subject && row.subject !== subject) return false;
+    return true;
+  });
 }
 
-function renderDocuments() {
-  mount(
-    '#documentRows',
-    documents.length
-      ? documents
-          .map(
-            (document) => `<tr>
-          <th scope="row"><span>${escapeHtml(document.displayName)}</span>
-            <small class="row-sub" dir="ltr">${escapeHtml(document.mimeType)}</small></th>
-          <td><span dir="auto">${escapeHtml(documentGroupNames(document))}</span></td>
-          <td>${escapeHtml(document.subjectName || document.subject)}</td>
-          <td><code class="folder-path" dir="ltr">${escapeHtml(document.folderPath || '-')}</code></td>
-          <td><span dir="ltr">${escapeHtml(formatBytes(document.size))}</span></td>
-          <td>${
-            document.published
-              ? `<span class="badge ok">${escapeHtml(t('state.published'))}</span>`
-              : `<span class="badge muted">${escapeHtml(t('state.draft'))}</span>`
-          }</td>
-          <td>${escapeHtml(document.uploaderName || '-')}</td>
-          <td><div class="row-actions">
-            <a class="btn secondary small" href="${escapeHtml(document.url)}">${escapeHtml(t('action.download'))}</a>
-            <button class="btn small" type="button" data-publish="${escapeHtml(document.id)}" data-next="${document.published ? 'false' : 'true'}">
-              ${document.published ? escapeHtml(t('action.unpublish')) : escapeHtml(t('action.publish'))}
-            </button>
-            <button class="btn danger small" type="button" data-delete-document="${escapeHtml(document.id)}" data-name="${escapeHtml(document.displayName)}">
-              ${escapeHtml(t('action.delete'))}
-            </button>
-          </div></td>
-        </tr>`
-          )
-          .join('')
-      : `<tr><td colspan="7" class="empty">${escapeHtml(t('msg.empty'))}</td></tr>`
-  );
-}
+function paint() {
+  const rows = visible();
+  const counter = document.getElementById('documentCount');
+  if (counter) counter.textContent = String(rows.length);
 
-async function loadReferences() {
-  const [groupData, documentData] = await Promise.all([
-    api.getQuiet('/api/admin/groups'),
-    api.getQuiet('/api/admin/documents'),
-  ]);
-  groups = (groupData?.groups || []).map((group) => group.name);
-  subjects = documentData?.subjects || [];
-
-  const groupOptions = groups.map((name) => ({ value: name, label: name }));
-  const subjectOptions = subjects.map((subject) => ({ value: subject.slug, label: subjectLabel(subject) }));
-  fillSelect(byId('documentGroup'), groupOptions, t('msg.allGroups'));
-  fillSelect(byId('documentSubject'), subjectOptions, t('msg.allGroups'));
-  fillSelect(byId('uploadGroup'), groupOptions, '');
-  fillSelect(byId('uploadSubject'), subjectOptions, '');
-}
-
-async function loadDocuments() {
-  const params = new URLSearchParams();
-  if (byId('documentGroup')?.value) params.set('group', byId('documentGroup').value);
-  if (byId('documentSubject')?.value) params.set('subject', byId('documentSubject').value);
-  const query = params.toString() ? `?${params}` : '';
-  const data = await api.getQuiet(`/api/admin/documents${query}`);
-  documents = data?.documents || [];
-  renderDocuments();
-}
-
-/** Read a File into base64; the bytes never appear in a URL, a log line or a stored path. */
-async function toBase64(file) {
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  let binary = '';
-  const chunk = 0x8000;
-  for (let offset = 0; offset < bytes.length; offset += chunk) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(offset, offset + chunk));
+  if (!rows.length) {
+    host.innerHTML = `<div class="state" role="status">
+        <p class="state__title">${escapeHtml(t('msg.empty'))}</p>
+        <p class="state__body">${escapeHtml(t('admin.noDocumentsBody'))}</p>
+      </div>`;
+    return;
   }
-  return btoa(binary);
+
+  host.innerHTML = `<div class="table-wrap">
+      <table class="table table--responsive">
+        <caption class="visually-hidden">${escapeHtml(t('admin.documentList'))}</caption>
+        <thead>
+          <tr>
+            <th scope="col">${escapeHtml(t('field.fileName'))}</th>
+            <th scope="col">${escapeHtml(t('field.group'))}</th>
+            <th scope="col">${escapeHtml(t('field.subject'))}</th>
+            <th scope="col">${escapeHtml(t('field.folder'))}</th>
+            <th scope="col">${escapeHtml(t('documents.size'))}</th>
+            <th scope="col">${escapeHtml(t('field.status'))}</th>
+            <th scope="col">${escapeHtml(t('field.actions'))}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows
+            .map(
+              (row) => `<tr>
+            <th scope="row" data-label="${escapeHtml(t('field.fileName'))}">
+              <span class="table__primary" dir="auto">${escapeHtml(row.displayName)}</span>
+              <small class="table__sub" dir="ltr">${escapeHtml(row.mimeType)}</small>
+            </th>
+            <td data-label="${escapeHtml(t('field.group'))}" dir="auto">${
+              escapeHtml((row.groups || [row.group]).filter(Boolean).join(', ') || '-')
+            }</td>
+            <td data-label="${escapeHtml(t('field.subject'))}">${escapeHtml(row.subjectName || row.subject || '-')}</td>
+            <td data-label="${escapeHtml(t('field.folder'))}"><code class="truncate" dir="ltr">${
+              escapeHtml(row.folderPath || '-')
+            }</code></td>
+            <td data-label="${escapeHtml(t('documents.size'))}" dir="ltr">${escapeHtml(formatBytes(row.size))}</td>
+            <td data-label="${escapeHtml(t('field.status'))}">
+              <span class="badge ${row.published ? 'badge--success' : 'badge--outline'}">${
+                escapeHtml(row.published ? t('documents.published') : t('documents.draft'))
+              }</span>
+            </td>
+            <td data-label="${escapeHtml(t('field.actions'))}">
+              <div class="table__actions">
+                <a class="btn btn--secondary btn--sm" href="${documentViewerHref(row.id)}">${escapeHtml(
+                  t('action.openInViewer')
+                )}</a>
+                <button class="btn btn--secondary btn--sm" type="button" data-publish="${escapeHtml(row.id)}"
+                        data-next="${row.published ? 'false' : 'true'}">
+                  ${escapeHtml(row.published ? t('action.unpublish') : t('action.publish'))}</button>
+                <button class="btn btn--danger btn--sm" type="button" data-delete-document="${escapeHtml(row.id)}"
+                        data-name="${escapeHtml(row.displayName)}">${escapeHtml(t('action.delete'))}</button>
+              </div>
+            </td>
+          </tr>`
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
-if (session) {
-  await loadReferences();
-  await loadDocuments();
+const view = createView('#documentRows', {
+  load: () => api.get('/api/admin/documents'),
+  render: (data) => {
+    documents = data.documents || [];
+    subjects = data.subjects || [];
 
-  byId('documentRefresh')?.addEventListener('click', () => loadDocuments());
-  byId('documentGroup')?.addEventListener('change', () => loadDocuments());
-  byId('documentSubject')?.addEventListener('change', () => loadDocuments());
+    const groupOptions = [...new Set(documents.flatMap((row) => row.groups || [row.group]).filter(Boolean))];
+    const currentGroup = groupSelect?.value;
+    if (groupSelect) {
+      groupSelect.innerHTML =
+        `<option value="">${escapeHtml(t('filter.all'))}</option>` +
+        groupOptions.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+      groupSelect.value = groupOptions.includes(currentGroup) ? currentGroup : '';
+    }
+    const currentSubject = subjectFilter?.value;
+    if (subjectFilter) {
+      subjectFilter.innerHTML =
+        `<option value="">${escapeHtml(t('documents.filterSubject'))}</option>` +
+        subjects
+          .map((subject) => `<option value="${escapeHtml(subject.slug)}">${escapeHtml(subjectLabel(subject))}</option>`)
+          .join('');
+      subjectFilter.value = subjects.some((subject) => subject.slug === currentSubject) ? currentSubject : '';
+    }
 
-  const form = byId('uploadForm');
-  form.addEventListener('submit', async (event) => {
+    const uploadGroup = document.getElementById('uploadGroup');
+    if (uploadGroup) {
+      const chosen = [...uploadGroup.selectedOptions].map((option) => option.value);
+      uploadGroup.innerHTML = groupOptions
+        .map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+        .join('');
+      for (const option of uploadGroup.options) option.selected = chosen.includes(option.value);
+    }
+    const uploadSubject = document.getElementById('uploadSubject');
+    if (uploadSubject) {
+      uploadSubject.innerHTML = subjects
+        .map((subject) => `<option value="${escapeHtml(subject.slug)}">${escapeHtml(subjectLabel(subject))}</option>`)
+        .join('');
+    }
+
+    return paint();
+  },
+  isEmpty: (data) => !(data?.documents || []).length,
+  empty: () => ({ icon: 'file-text', titleKey: 'msg.empty', bodyKey: 'admin.noDocumentsBody' }),
+}).reload();
+
+groupSelect?.addEventListener('change', paint);
+subjectFilter?.addEventListener('change', paint);
+
+/* ------------------------------------------------------------- the dropzone */
+
+const dropzone = document.getElementById('uploadDropzone');
+const fileInput = document.getElementById('uploadFiles');
+const fileList = document.getElementById('uploadFileList');
+
+function paintChosenFiles() {
+  const files = [...(fileInput?.files || [])];
+  if (!fileList) return;
+  fileList.innerHTML = files
+    .map((file) => `<li dir="auto">${escapeHtml(file.name)} &middot; ${escapeHtml(formatBytes(file.size))}</li>`)
+    .join('');
+}
+
+fileInput?.addEventListener('change', paintChosenFiles);
+
+if (dropzone) {
+  for (const type of ['dragenter', 'dragover']) {
+    dropzone.addEventListener(type, (event) => {
+      event.preventDefault();
+      dropzone.classList.add('is-dragging');
+    });
+  }
+  for (const type of ['dragleave', 'drop']) {
+    dropzone.addEventListener(type, () => dropzone.classList.remove('is-dragging'));
+  }
+  dropzone.addEventListener('drop', (event) => {
     event.preventDefault();
-    /* The input is #uploadFiles (plural): every chosen file is sent, and the server decides
-       which folder each one lands in from its content type. */
-    const chosen = [...(byId('uploadFiles')?.files || [])];
-    const button = byId('uploadSubmit');
-    if (!chosen.length) {
-      showMessage('uploadMessage', t('msg.pickFileFirst'), 'error');
+    if (!fileInput) return;
+    /* DataTransfer is how a drop reaches a real input; nothing is read here. */
+    fileInput.files = event.dataTransfer?.files || null;
+    paintChosenFiles();
+  });
+}
+
+/* ----------------------------------------------------------------- upload */
+
+const uploadForm = document.getElementById('uploadForm');
+
+uploadForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const chosen = [...(fileInput?.files || [])];
+  const button = document.getElementById('uploadSubmit');
+
+  if (!chosen.length) return showMessage('uploadMessage', t('msg.pickFileFirst'), 'error');
+
+  const data = new FormData(uploadForm);
+  const selectedGroups = [...document.getElementById('uploadGroup').selectedOptions].map((option) => option.value);
+  if (!selectedGroups.length) return showMessage('uploadMessage', t('msg.groupRequired'), 'error');
+
+  const folder = {
+    weekNumber: String(data.get('weekNumber') || '1'),
+    sessionKind: String(data.get('sessionKind') || 'lecture'),
+    lectureNumber: String(data.get('lectureNumber') || '1'),
+  };
+
+  setBusy(button, true, t('msg.uploading'));
+  const saved = [];
+  let replaced = 0;
+  try {
+    for (const file of chosen) {
+      const result = await api.post('/api/admin/documents', {
+        groups: selectedGroups,
+        subject: String(data.get('subject') || ''),
+        displayName: String(data.get('displayName') || '').trim() || file.name,
+        published: data.get('published') === 'on',
+        ...folder,
+        fileName: file.name,
+        fileBase64: await toBase64(file),
+      });
+      if (result?.replaced) replaced += 1;
+      saved.push(result?.document?.folderPath || '?');
+    }
+
+    uploadForm.reset();
+    paintChosenFiles();
+    showMessage('uploadMessage',
+      `${t('msg.documentsSaved')} (${saved.length})` + (replaced ? ` - ${replaced} ${t('msg.replacedSlot')}` : ''),
+      'success');
+    document.getElementById('uploadSaved').innerHTML =
+      `<ul class="rows card card--flush">${saved
+        .map((path) => `<li class="row"><span class="row__main"><code dir="ltr">${escapeHtml(path)}</code></span></li>`)
+        .join('')}</ul>`;
+
+    /* The student's document list is scoped to their group; drop it so the next
+       read is the fresh one, with no manual refresh anywhere. */
+    invalidateApi(['/api/documents', '/api/admin/documents', '/api/admin/subjects']);
+    await view.reload();
+  } catch (error) {
+    showMessage('uploadMessage', serverText(error.message, { status: error.status }), 'error');
+  } finally {
+    setBusy(button, false);
+  }
+});
+
+/* -------------------------------------------------------------- mutations */
+
+document.getElementById('documentRows').addEventListener('click', async (event) => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  try {
+    if (button.dataset.publish) {
+      await api.patch(`/api/admin/documents/${encodeURIComponent(button.dataset.publish)}`, {
+        published: button.dataset.next === 'true',
+      });
+      toast(t('msg.saved'), 'success');
+    } else if (button.dataset.deleteDocument) {
+      if (!confirmDialog(t('msg.confirmDelete', { name: button.dataset.name }))) return;
+      await api.del(`/api/admin/documents/${encodeURIComponent(button.dataset.deleteDocument)}`);
+      toast(t('msg.deleted'), 'success');
+    } else {
       return;
     }
-    setBusy(button, true, t('msg.uploading'));
-    try {
-      const data = new FormData(form);
-      const selectedGroups = [...byId('uploadGroup').selectedOptions].map((option) => option.value);
-      if (!selectedGroups.length) {
-        showMessage('uploadMessage', t('msg.groupRequired'), 'error');
-        setBusy(button, false);
-        return;
-      }
-      /* The folder is decided here once and sent with every file, so a PDF, a Word file, a
-         video and a recording all land under the same session folder with their own names. */
-      const session = {
-        weekNumber: String(data.get('weekNumber') || '1'),
-        sessionKind: String(data.get('sessionKind') || 'lecture'),
-        lectureNumber: String(data.get('lectureNumber') || '1'),
-      };
-      let replaced = 0;
-      const saved = [];
-      for (const file of chosen) {
-        const result = await api.post('/api/admin/documents', {
-          groups: selectedGroups,
-          subject: String(data.get('subject') || ''),
-          displayName: String(data.get('title') || '').trim(),
-          published: data.get('published') === 'on',
-          ...session,
-          fileName: file.name,
-          fileBase64: await toBase64(file),
-        });
-        if (result?.replaced) replaced += 1;
-        saved.push(result?.document?.folderPath || '?');
-      }
-      form.reset();
-      /* Stay on this page and say exactly what was written and where - one line per file,
-         so a multi-file upload is never a silent success. */
-      showMessage('uploadMessage',
-        `${t('msg.documentsSaved')} (${saved.length})` +
-        (replaced ? ` - ${replaced} ${t('msg.replacedSlot')}` : ''),
-        'success');
-      mount('#uploadSaved',
-        `<ul class="saved-list">${saved.map((p) => `<li><code dir="ltr">${escapeHtml(p)}</code></li>`).join('')}</ul>`);
-      await loadDocuments();
-    } catch (error) {
-      showMessage('uploadMessage', serverText(error.message, { status: error.status }), 'error');
-    } finally {
-      setBusy(button, false);
-    }
-  });
-
-  document.getElementById('documentRows').addEventListener('click', async (event) => {
-    const button = event.target.closest('button');
-    if (!button) return;
-    try {
-      if (button.dataset.publish) {
-        await api.patch(`/api/admin/documents/${encodeURIComponent(button.dataset.publish)}`, {
-          published: button.dataset.next === 'true',
-        });
-        toast(t('msg.documentUpdated'), 'success');
-        await loadDocuments();
-        return;
-      }
-      if (button.dataset.deleteDocument) {
-        if (!window.confirm(t('msg.confirmDelete', { name: button.dataset.name }))) return;
-        await api.del(`/api/admin/documents/${encodeURIComponent(button.dataset.deleteDocument)}`);
-        toast(t('msg.documentDeleted'), 'success');
-        await loadDocuments();
-      }
-    } catch (error) {
-      showMessage('documentMessage', serverText(error.message, { status: error.status }), 'error');
-    }
-  });
-}
-
+    invalidateApi(['/api/documents', '/api/admin/documents']);
+    await view.reload();
+  } catch (error) {
+    showMessage('documentMessage', serverText(error.message, { status: error.status }), 'error');
+  }
+});

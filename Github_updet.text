@@ -1,3 +1,21 @@
+github:.
+
+git init
+git add .
+git commit -m "Initial upload"
+git branch -M main
+git remote add origin https://github.com/youssef1mahmouf/ECU_Students_Assistant-
+git push -u origin main
+
 git add .
 git commit -m "Update"
 git push
+
+
+
+
+
+frontend:.
+
+cd "D:\ECU WEB\ECU_Students_Assessment"
+npx wrangler deploy --assets frontend/dist --compatibility-date 2026-10-01

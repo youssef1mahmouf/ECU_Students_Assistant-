@@ -1,54 +1,86 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الإبلاغ عن مشكلة · بوابة المجموعات</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="robots" content="noindex">
+  <title>الدعم والإبلاغ</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/user/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.report">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <div id="userBanner"></div>
-    <section class="surface">
-      <p class="eyebrow" data-i18n="nav.report">الإبلاغ عن مشكلة</p>
-      <h1 data-i18n="problems.title">الإبلاغ عن مشكلة</h1>
-      <p class="subtext" data-i18n="problems.note">يُحفظ البلاغ ويظهر للإدارة، وتُرسل نسخة إلى بريد الدعم عند توفر البريد.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <form id="problemForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="problemCategory" data-i18n="field.category">التصنيف</label>
-            <select id="problemCategory" name="category" required>
-              <option value="bug" data-i18n="problems.categoryBug">مشكلة تقنية</option>
-              <option value="content" data-i18n="problems.categoryContent">محتوى غير صحيح</option>
-              <option value="account" data-i18n="problems.categoryAccount">مشكلة في الحساب</option>
-              <option value="group" data-i18n="problems.categoryGroup">مشكلة في المجموعة</option>
-              <option value="other" data-i18n="problems.categoryOther">موضوع آخر</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="problemPage" data-i18n="field.page">الصفحة</label>
-            <input id="problemPage" name="page" maxlength="200" dir="ltr">
-            <span class="hint" data-i18n="problems.pageAuto">تُرفق الصفحة التي تُبلِّغ منها تلقائيًا.</span>
-          </div>
-          <div class="field full">
-            <label for="problemDescription" data-i18n="admin.problemDescription">الوصف</label>
-            <textarea id="problemDescription" name="description" rows="6" maxlength="2000" required data-i18n-placeholder="problems.descriptionPlaceholder" placeholder="اكتب ما حدث بالتفصيل…"></textarea>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page shell--narrow" id="main" style="width:min(100%,44rem)">
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.support">الدعم</p>
+            <h1 data-i18n="support.title">الدعم والإبلاغ</h1>
+            <p class="lead" data-i18n="support.subtitle">أبلغ عن مشكلة في البوابة؛ يصل البلاغ للإدارة ويُحفظ.</p>
           </div>
         </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="problemSubmit" data-i18n="action.send">إرسال</button>
-        </div>
-        <p class="message" id="problemMessage" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-  </main>
 
-  <footer class="shell" id="appFooter"></footer>
+        <section class="card">
+          <form id="problemForm">
+            <div class="form-grid">
+              <div class="field">
+                <label class="label" for="problemCategory" data-i18n="field.category">التصنيف</label>
+                <select class="control" id="problemCategory" name="category" required>
+                  <option value="bug" data-i18n="problems.categoryBug">مشكلة تقنية</option>
+                  <option value="content" data-i18n="problems.categoryContent">محتوى غير صحيح</option>
+                  <option value="account" data-i18n="problems.categoryAccount">مشكلة في الحساب</option>
+                  <option value="group" data-i18n="problems.categoryGroup">مشكلة في المجموعة</option>
+                  <option value="other" data-i18n="problems.categoryOther">موضوع آخر</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="problemPage" data-i18n="field.page">الصفحة</label>
+                <input class="control" id="problemPage" name="page" maxlength="200" dir="ltr">
+                <span class="hint" data-i18n="problems.pageAuto">تُرفق الصفحة التي تُبلِّغ منها تلقائيًا.</span>
+              </div>
+              <div class="field field--full">
+                <label class="label" for="problemDescription" data-i18n="admin.problemDescription">الوصف</label>
+                <textarea class="control" id="problemDescription" name="description" rows="6" maxlength="2000"
+                          required data-i18n-placeholder="problems.descriptionPlaceholder"
+                          placeholder="اكتب ما حدث بالتفصيل…"></textarea>
+                <span class="hint"><span id="problemCount">0</span> / 2000</span>
+              </div>
+            </div>
+            <div class="cluster" style="margin-top:var(--space-4)">
+              <button class="btn btn--primary" type="submit" id="problemSubmit" data-i18n="action.send">إرسال</button>
+            </div>
+            <p class="message" id="problemMessage" role="status" aria-live="polite" style="margin-top:var(--space-3)"></p>
+          </form>
+        </section>
+
+        <section class="page__section">
+          <div class="notice notice--info">
+            <svg viewBox="0 0 24 24" width="1.15rem" height="1.15rem" aria-hidden="true" focusable="false">
+              <path d="M12 16v-4"></path><path d="M12 8h.01"></path>
+              <circle cx="12" cy="12" r="10"></circle>
+            </svg>
+            <p class="notice__body" data-i18n="problems.note">
+              يُحفظ البلاغ ويظهر للإدارة، وتُرسل نسخة إلى بريد الدعم عند توفر البريد.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/user/scripts/report.js"></script>
 </body>
 </html>

@@ -2,14 +2,21 @@
   "name": "ecu-students-assessment-frontend",
   "version": "2.0.0",
   "private": true,
-  "description": "Static frontend (guest, user, admin) for the ECU Students Assessment portal. Vanilla ES modules served by the Express API, deployable as-is to Cloudflare Pages.",
+  "description": "Static frontend (guest, user, admin) for the ECU Students Assessment portal. Vanilla ES modules with one design system, served by the Express API and deployable as-is to Cloudflare Pages.",
   "type": "module",
   "scripts": {
-    "build": "node build.mjs"
+    "vendor": "node prepare.mjs",
+    "check": "node check.mjs && node csscheck.mjs && node i18naudit.mjs",
+    "check:css": "node csscheck.mjs",
+    "check:i18n": "node i18naudit.mjs",
+    "build": "node prepare.mjs && node build.mjs"
   },
   "engines": {
     "node": ">=18"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "lucide-static": "^0.469.0",
+    "pdfjs-dist": "^4.10.38"
+  },
+  "postinstall": "node prepare.mjs"
 }

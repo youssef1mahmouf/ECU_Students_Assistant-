@@ -1,81 +1,77 @@
-import { bootAdmin } from '/shared/admin-layout.js';
+﻿/**
+ * /admin/profile/ - the signed-in staff member's own account.
+ *
+ * Same component as the student profile, in the same shell: identity as
+ * read-only facts, a name form, and a password form. Nothing privileged is
+ * editable here - roles and other accounts live in /admin/accounts/.
+ */
+import { bootAdmin, refreshChrome } from '/shared/admin-layout.js';
 import { api } from '/shared/api.js';
-import { escapeHtml, initials, showMessage, setBusy } from '/shared/ui.js';
-import { t, onLanguageChange } from '/shared/i18n.js';
+import { escapeHtml, showMessage, setBusy, toast } from '/shared/ui.js';
+import { t, serverText } from '/shared/i18n.js';
+import { currentUser } from '/shared/session.js';
 
 const session = await bootAdmin({ active: 'profile' });
+if (!session) throw new Error('redirecting');
 
-// The editable display name is never the roster identity; it defaults to the
-// account's short name and is the value the server accepts on update.
-function resultName(userToPaint) {
-  return userToPaint.name || '';
+const initial = currentUser();
+
+function fact(label, value, dir) {
+  return `<div class="definition-grid__item">
+      <span class="definition-grid__label">${escapeHtml(label)}</span>
+      <span class="definition-grid__value"${dir ? ` dir="${dir}"` : ''}>${escapeHtml(value || '-')}</span>
+    </div>`;
 }
 
-function formatText(value) {
-  if (!value) return t('msg.neverSignedIn');
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return escapeHtml(String(value));
-  return new Intl.DateTimeFormat(document.documentElement.lang || 'ar', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+function paint(user) {
+  document.getElementById('identityFacts').innerHTML = [
+    fact(t('field.name'), user.name),
+    fact(t('profile.rosterName'), user.rosterName || '-'),
+    fact(t('field.email'), user.email, 'ltr'),
+    fact(t('field.group'), user.group || '-', 'auto'),
+    fact(t('field.role'), t(`role.${user.role}`)),
+    fact(t('field.status'), user.active === false ? t('state.inactive') : t('state.active')),
+  ].join('');
 }
 
-function paintMeta(user) {
-  document.getElementById('profileMeta').textContent =
-    `${user.email} · ${t(`role.${user.role}`)} · ${t('msg.lastLogin', { time: formatText(user.lastLoginAt) })}`;
-}
+paint(initial);
+document.getElementById('profileInputName').value = initial.name || '';
 
-if (session) {
-  const user = session.user;
-  const rosterNameFor = (userToPaint) => userToPaint.rosterName || user.rosterName || '';
+document.getElementById('profileForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = document.getElementById('profileSubmit');
+  setBusy(button, true, t('msg.saving'));
+  showMessage('profileMessage', '');
+  try {
+    await api.patch('/api/user/profile', { name: document.getElementById('profileInputName').value.trim() });
+    refreshChrome();
+    paint({ ...initial, name: document.getElementById('profileInputName').value.trim() });
+    showMessage('profileMessage', t('profile.saved'), 'success');
+    toast(t('profile.saved'), 'success');
+  } catch (error) {
+    showMessage('profileMessage', serverText(error.message, { status: error.status }), 'error');
+  } finally {
+    setBusy(button, false);
+  }
+});
 
-  // "Full name" rendering for Account Details: full roster name first, falling
-  // back to the user's short display name only when the roster name is absent.
-  document.getElementById('profileAvatar').textContent = initials(user.name);
-  document.getElementById('profileName').textContent = rosterNameFor(user) || user.name || '-';
-  paintMeta(user);
-  document.getElementById('profileInputName').value = resultName(user);
-  document.getElementById('profileEmail').value = user.email || '';
-  document.getElementById('profileRosterName').value = rosterNameFor(user);
-
-  const profileForm = document.getElementById('profileForm');
-  profileForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const name = String(new FormData(profileForm).get('name') || '').trim();
-    const button = document.getElementById('profileSubmit');
-    setBusy(button, true, t('msg.saving'));
-    try {
-      const result = await api.patch('/api/user/profile', { name });
-      showMessage('profileMessage', t('msg.profileSaved'), 'success');
-      // Roster identity stays untouched: only refresh the short display name.
-      document.getElementById('profileInputName').value = resultName(result?.user || { name });
-      document.getElementById('profileName').textContent = rosterNameFor(result?.user || {}) || result?.user?.name || name;
-    } catch (error) {
-      showMessage('profileMessage', error.message, 'error');
-    } finally {
-      setBusy(button, false);
-    }
-  });
-
-  const passwordForm = document.getElementById('passwordForm');
-  passwordForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const data = new FormData(passwordForm);
-    const button = document.getElementById('passwordSubmit');
-    setBusy(button, true, t('msg.saving'));
-    try {
-      await api.post('/api/auth/change-password', {
-        currentPassword: String(data.get('currentPassword') || ''),
-        newPassword: String(data.get('newPassword') || ''),
-      });
-      passwordForm.reset();
-      showMessage('passwordMessage', t('msg.passwordChangedElsewhere'), 'success');
-      toast(t('msg.passwordChanged'), 'success');
-    } catch (error) {
-      showMessage('passwordMessage', error.message, 'error');
-    } finally {
-      setBusy(button, false);
-    }
-  });
-
-  /* A language switch rewrites the role and the "last sign-in" line, not just the labels. */
-  onLanguageChange(() => paintMeta(user));
-}
+document.getElementById('passwordForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = document.getElementById('passwordSubmit');
+  setBusy(button, true, t('msg.saving'));
+  showMessage('passwordMessage', '');
+  try {
+    await api.post('/api/auth/change-password', {
+      currentPassword: document.getElementById('currentPassword').value,
+      newPassword: document.getElementById('newPassword').value,
+    });
+    event.target.reset();
+    showMessage('passwordMessage', t('profile.passwordChanged'), 'success');
+    toast(t('profile.passwordChanged'), 'success');
+    window.setTimeout(() => window.location.replace('/user/signin/'), 1600);
+  } catch (error) {
+    showMessage('passwordMessage', serverText(error.message, { status: error.status }), 'error');
+  } finally {
+    setBusy(button, false);
+  }
+});

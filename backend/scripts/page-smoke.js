@@ -86,18 +86,44 @@ async function signIn(email, jar) {
   });
 }
 
+/* Every admin page, with the element that proves the page body really was
+   served rather than an empty shell. The 2026 redesign added four pages here;
+   each reuses an existing capability, so the guard set is unchanged in substance. */
 const ADMIN_PAGES = [
   ['/admin/dashboard/', 'statGrid'],
-  ['/admin/accounts/', 'accountRows'],
-  ['/admin/groups/', 'groupRows'],
-  ['/admin/subjects/', 'subjectRows'],
-  ['/admin/documents/', 'documentRows'],
+  ['/admin/notifications/', 'adminNotifications'],
+  ['/admin/health/', 'healthStatus'],
   ['/admin/activity/', 'activityList'],
+  ['/admin/security/', 'securityEvents'],
+  ['/admin/groups/', 'groupRows'],
+  ['/admin/accounts/', 'accountRows'],
+  ['/admin/library/', 'adminLibrary'],
+  ['/admin/documents/', 'documentRows'],
+  ['/admin/subjects/', 'subjectRows'],
   ['/admin/information/', 'infoForm'],
   ['/admin/problems/', 'problemRows'],
   ['/admin/profile/', 'profileForm'],
+  ['/admin/settings/', 'themeOptions'],
 ];
 
+/* Student pages added by the redesign: the library explorer, the in-app viewer,
+   the notification centre and the settings page. Each reuses the existing
+   requireAuthPage guard, so an anonymous visitor is redirected before any markup
+   is handed out.
+   /user/ itself is deliberately NOT listed: it is a PUBLIC_PAGE, served to anyone
+   and resolved in the browser, because it must be able to render its own
+   "please sign in" state before a session is known. */
+const STUDENT_PAGES = [
+  ['/user/library/', 'libraryExplorer'],
+  ['/user/viewer/', 'viewerRoot'],
+  ['/user/notifications/', 'notificationList'],
+  ['/user/settings/', 'themeOptions'],
+];
+
+/* The redesign replaced three per-area stylesheets with one design system, so
+   this list asserts the shared layers instead. The compatibility entry points
+   (layout.js, admin-layout.js) are still served on purpose: page modules and this
+   test import them by that path. */
 const SHARED_ASSETS = [
   '/admin/scripts/dashboard.js',
   '/admin/scripts/accounts.js',
@@ -108,19 +134,47 @@ const SHARED_ASSETS = [
   '/admin/scripts/information.js',
   '/admin/scripts/problems.js',
   '/admin/scripts/profile.js',
-  '/admin/styles.css',
+  '/admin/scripts/library.js',
+  '/admin/scripts/notifications.js',
+  '/admin/scripts/security.js',
+  '/admin/scripts/health.js',
+  '/admin/scripts/settings.js',
+  '/user/scripts/home.js',
   '/user/scripts/signin.js',
   '/user/scripts/register.js',
+  '/user/scripts/groups.js',
   '/user/scripts/documents.js',
+  '/user/scripts/library.js',
+  '/user/scripts/viewer.js',
+  '/user/scripts/notifications.js',
   '/user/scripts/report.js',
-  '/user/styles.css',
+  '/user/scripts/profile.js',
+  '/user/scripts/settings.js',
   '/shared/api.js',
+  '/shared/shell.js',
+  '/shared/nav.js',
+  '/shared/theme.js',
+  '/shared/icons.js',
+  '/shared/theme-boot.js',
+  '/shared/notifications.js',
   '/shared/admin-layout.js',
   '/shared/layout.js',
   '/shared/ui.js',
+  '/shared/ui/view.js',
+  '/shared/ui/chart.js',
+  '/shared/views/library.js',
+  '/shared/views/viewer.js',
+  '/shared/views/settings.js',
+  '/shared/data/library.js',
   '/shared/i18n.js',
   '/shared/session.js',
+  '/shared/tokens.css',
   '/shared/base.css',
+  '/shared/components.css',
+  '/shared/shell.css',
+  '/shared/library.css',
+  '/shared/vendor/pdf/pdf.min.mjs',
+  '/shared/vendor/pdf/pdf.worker.min.mjs',
 ];
 
 
@@ -158,6 +212,8 @@ async function seed() {
 
 async function run() {
   const adminJar = makeJar();
+  const studentJarPre = makeJar();
+  await signIn('one@ecu.edu.eg', studentJarPre);
   const adminLogin = await signIn('staff@ecu.edu.eg', adminJar);
   check('admin sign-in works', adminLogin.status === 200, `status ${adminLogin.status}`);
 
@@ -173,6 +229,22 @@ async function run() {
     const asset = await open(assetPath);
     check(`${assetPath} served`, asset.status === 200 && asset.text.length > 0, `status ${asset.status}`);
   }
+
+  console.log('\n[2b] Student pages added by the redesign are served and guarded');
+  for (const [urlPath, marker] of STUDENT_PAGES) {
+    const page = await open(urlPath, { jar: adminJar });
+    check(`${urlPath} served to a signed-in account`, page.status === 200 && page.text.includes(`id="${marker}"`),
+      `status ${page.status}`);
+    const denied = await fetch(baseUrl + urlPath, { redirect: 'manual' });
+    check(`${urlPath} refuses an anonymous visitor`, denied.status === 303,
+      `status ${denied.status}`);
+  }
+  const studentLibrary = await open('/user/library/', { jar: studentJarPre });
+  check('/user/library/ is served to a student', studentLibrary.status === 200
+    && studentLibrary.text.includes('id="libraryExplorer"'), `status ${studentLibrary.status}`);
+  const anonymousLibrary = await fetch(baseUrl + '/user/library/', { redirect: 'manual' });
+  check('/user/library/ redirects an anonymous visitor before any markup', anonymousLibrary.status === 303,
+    `status ${anonymousLibrary.status}`);
 
   console.log('\n[3] Student portal pages and data scoping');
   const studentJar = makeJar();

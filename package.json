@@ -20,7 +20,9 @@
     "verify": "node backend/scripts/smoke-test.js",
     "verify:pages": "node backend/scripts/page-smoke.js",
     "verify:documents": "node backend/scripts/verify-documents.js",
-    "test:db": "node backend/test-conn.js"
+    "test:db": "node backend/test-conn.js",
+    "verify:browser": "node backend/scripts/browser-smoke.js",
+    "verify:all": "npm run check && npm run verify && npm run verify:pages && npm run verify:browser"
   },
   "engines": {
     "node": ">=18.17"
@@ -31,5 +33,8 @@
     "express": "^5.2.1",
     "mongodb": "^7.6.0",
     "mongoose": "^9.10.2"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.11.1"
   }
 }

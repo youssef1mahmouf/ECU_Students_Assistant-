@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="robots" content="noindex">
+  <title>إعدادات النظام</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
+</head>
+<body data-page-title="title.settingsAdmin">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
+
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.settings">الإعدادات</p>
+            <h1 data-i18n="title.settingsAdmin">إعدادات النظام</h1>
+            <p class="lead" data-i18n="admin.settingsNote">تفضيلات العرض محفوظة في هذا المتصفح، ومعلومات الموقع تُحرَّر من صفحة المعلومات.</p>
+          </div>
+        </div>
+
+        <div class="stack" style="max-width:46rem">
+          <section class="card">
+            <h2 class="card__title" data-i18n="theme.label">السمة</h2>
+            <p class="hint" data-i18n="theme.note">محفوظة في هذا المتصفح فقط.</p>
+            <div class="segmented" id="themeOptions" role="radiogroup" data-i18n-label="theme.label">
+              <label class="segmented__option">
+                <input type="radio" name="theme" value="light"><span data-i18n="theme.light">الفاتح</span></label>
+              <label class="segmented__option">
+                <input type="radio" name="theme" value="dark"><span data-i18n="theme.dark">الداكن</span></label>
+              <label class="segmented__option">
+                <input type="radio" name="theme" value="system"><span data-i18n="theme.system">حسب النظام</span></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="card__title" data-i18n="theme.density">كثافة العرض</h2>
+            <div class="segmented" id="densityOptions" role="radiogroup" data-i18n-label="theme.density">
+              <label class="segmented__option">
+                <input type="radio" name="density" value="comfortable"><span data-i18n="theme.densityComfortable">مريحة</span></label>
+              <label class="segmented__option">
+                <input type="radio" name="density" value="compact"><span data-i18n="theme.densityCompact">مضغوطة</span></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="card__title" data-i18n="theme.motion">الحركة</h2>
+            <div class="segmented" id="motionOptions" role="radiogroup" data-i18n-label="theme.motion">
+              <label class="segmented__option">
+                <input type="radio" name="motion" value="full"><span data-i18n="theme.motionFull">كاملة</span></label>
+              <label class="segmented__option">
+                <input type="radio" name="motion" value="reduced"><span data-i18n="theme.motionReduced">مقلّلة</span></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="card__title" data-i18n="theme.language">لغة الواجهة</h2>
+            <div class="segmented" id="languageOptions" role="radiogroup" data-i18n-label="theme.language">
+              <label class="segmented__option"><input type="radio" name="uilanguage" value="ar"><span>العربية</span></label>
+              <label class="segmented__option"><input type="radio" name="uilanguage" value="en"><span>English</span></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="card__title" data-i18n="admin.siteInfo">معلومات الموقع</h2>
+            <p class="hint" data-i18n="admin.siteInfoNote">تُحرَّر من صفحة المعلومات.</p>
+            <a class="btn btn--secondary" href="/admin/information/" data-i18n="admin.information">المعلومات</a>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
+  <script type="module" src="/admin/scripts/settings.js"></script>
+</body>
+</html>

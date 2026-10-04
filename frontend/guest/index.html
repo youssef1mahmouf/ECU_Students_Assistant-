@@ -1,54 +1,67 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5f7f2">
-  <meta name="description" content="بوابة المجموعات - معلومات عامة عن التقييمات والمجموعات.">
-  <title>بوابة المجموعات · الصفحة العامة</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="description" content="بوابة طلاب ECU: التقييمات المعلنة ومعلومات المجموعات.">
+  <title>ECU Students Portal</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/guest/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.guest">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <div id="previewBanner"></div>
-    <section class="hero">
-      <p class="eyebrow" data-i18n="guest.eyebrow">ECU · Students Assessment</p>
-      <h1 data-i18n="guest.title">مساحة المجموعات والتقييمات</h1>
-      <p class="lead" data-i18n="guest.lead">معلومات عامة عن التقييمات، ثم تسجيل الدخول للوصول إلى محتوى مجموعتك.</p>
-      <div class="actions">
-        <a class="btn" href="/user/signin/" data-i18n="nav.signin">تسجيل الدخول</a>
-        <a class="btn secondary" href="/user/register/" data-i18n="nav.register">حساب جديد</a>
-        <a class="btn ghost" href="/guest/assessments/" data-i18n="action.previewAssessments">عرض التقييمات المعلنة</a>
-      </div>
-    </section>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-    <section class="surface" aria-labelledby="latest-assessments">
-      <h2 id="latest-assessments" data-i18n="guest.latest">آخر التقييمات المعلنة</h2>
-      <p class="subtext" data-i18n="guest.latestNote">هذه المعلومات عامة ومسموح بها للزوار. محتوى المجموعة الخاص يظهر بعد تسجيل الدخول والاعتماد.</p>
-      <div class="list" id="publicAssessments"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-    </section>
+    <div class="app__body app__body--no-nav">
+      <main class="page shell" id="main">
+        <div id="previewBanner"></div>
 
-    <section class="surface" aria-labelledby="groups-heading">
-      <h2 id="groups-heading" data-i18n="guest.groups">المجموعات</h2>
-      <div class="group-grid" id="publicGroups"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-    </section>
+        <!-- Landing. Shown to a visitor; removed for a signed-in preview. -->
+        <section class="hero" id="guestHero">
+          <p class="eyebrow" data-i18n="guest.eyebrow">ECU</p>
+          <h1 data-i18n="guest.title">مساحة المجموعات والتقييمات</h1>
+          <p class="lead" data-i18n="guest.lead">معلومات عامة عن التقييمات، ثم تسجيل الدخول للوصول إلى محتوى مجموعتك.</p>
+          <div class="cluster">
+            <a class="btn btn--primary btn--lg" href="/user/signin/" data-i18n="nav.signin">تسجيل الدخول</a>
+            <a class="btn btn--secondary btn--lg" href="/user/register/" data-i18n="nav.register">حساب جديد</a>
+          </div>
+        </section>
 
-    <section class="surface note" aria-labelledby="access-heading">
-      <h2 id="access-heading" data-i18n="guest.how">كيف تصل إلى المحتوى؟</h2>
-      <ol class="steps">
-        <li data-i18n="guest.step1">أنشئ حساب طالب واختر مجموعتك.</li>
-        <li data-i18n="guest.step2">ينتظر الأدمن اعتماد انضمامك للمجموعة.</li>
-        <li data-i18n="guest.step3">بعد الاعتماد ترى محتوى مجموعتك فقط.</li>
-      </ol>
-      <p class="subtext" data-i18n="guest.adminNote">الصفحات الإدارية للحسابات المخوّل بها فقط، ويتم التحقق من الصلاحية في الخادم.</p>
-    </section>
-  </main>
+        <section class="page__section" aria-labelledby="latest-heading">
+          <div class="section__head">
+            <h2 id="latest-heading" data-i18n="guest.latest">آخر التقييمات المعلنة</h2>
+            <a class="small" href="/guest/assessments/" data-i18n="action.viewAll">عرض الكل</a>
+          </div>
+          <div class="stack" id="publicAssessments"></div>
+        </section>
 
-  <footer class="shell" id="appFooter"></footer>
+        <section class="page__section" aria-labelledby="groups-heading">
+          <h2 id="groups-heading" data-i18n="guest.groups">المجموعات</h2>
+          <div class="grid-auto" id="publicGroups"></div>
+        </section>
+
+        <section class="page__section" aria-labelledby="access-heading">
+          <h2 id="access-heading" data-i18n="guest.how">كيف تصل إلى المحتوى؟</h2>
+          <ol class="steps">
+            <li data-i18n="guest.step1">أنشئ حساب طالب واختر مجموعتك.</li>
+            <li data-i18n="guest.step2">ينتظر الأدمن اعتماد انضمامك للمجموعة.</li>
+            <li data-i18n="guest.step3">بعد الاعتماد ترى محتوى مجموعتك فقط.</li>
+          </ol>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/guest/scripts/home.js"></script>
 </body>
 </html>
+

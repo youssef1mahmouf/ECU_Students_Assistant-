@@ -1,0 +1,1800 @@
+﻿/* ==========================================================================
+   ECU components. Every colour, radius, shadow and duration is a token, so the
+   whole library re-themes from the one `data-theme` attribute on <html>.
+   Anything a page draws repeatedly belongs here; anything drawn once stays on
+   the page. Class names are semantic (`.card`, `.btn`) and never tied to a
+   colour or a location.
+   ========================================================================== */
+
+/* ------------------------------------------------------------ page header */
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-block-end: var(--space-5);
+}
+
+.page-head__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: min(100%, 18rem);
+}
+
+.page-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* ---------------------------------------------------------------- buttons */
+/* One base, four intents, three sizes. Every variant differs from the surface
+   by a 3:1 border or a fill, never by colour alone - the label always says what
+   the button does. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-out);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn > svg {
+  width: 1.05em;
+  height: 1.05em;
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-inset);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: var(--color-on-primary);
+}
+
+.btn--secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-primary);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}
+
+.btn--danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.btn--danger:hover:not(:disabled) {
+  filter: brightness(1.06);
+  color: var(--color-text-inverse);
+}
+
+:root[data-theme="dark"] .btn--danger {
+  color: #3a1618;
+}
+
+.btn--sm {
+  min-height: 2rem;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.btn--lg {
+  min-height: 3rem;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-md);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* Square icon-only control. Always carries an aria-label from the page. */
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-decoration: none;
+  flex: none;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.icon-btn:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.icon-btn > svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.icon-btn--sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.icon-btn--bordered {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+/* The unread count that rides on the notification bell. */
+.bell-badge {
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  font-size: 0.625rem;
+  font-weight: var(--weight-bold);
+  line-height: 1rem;
+  text-align: center;
+}
+
+:root[data-theme="dark"] .bell-badge {
+  color: #3a1618;
+}
+
+.bell-badge[hidden] {
+  display: none;
+}
+
+/* The account trigger: avatar, name, caret. */
+.account-menu {
+  position: relative;
+}
+
+.account-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.account-button:hover {
+  background: var(--color-primary-soft);
+}
+
+.account-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-name.block {
+  display: block;
+  max-width: 100%;
+}
+
+/* ------------------------------------------------------------------ cards */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.card--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card--quiet {
+  box-shadow: none;
+  background: var(--color-surface-sunken);
+  border-color: transparent;
+}
+
+.card--accent {
+  border-color: var(--color-primary-soft-strong);
+  background: var(--color-primary-soft);
+}
+
+.card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.card__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+/* A whole card that is also one control (a library tile, a subject tile). The
+   element itself carries the class, so it is keyboard-navigable and announced
+   correctly with no extra ARIA. */
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out);
+}
+
+.tile:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+  color: inherit;
+}
+
+.tile.is-selected,
+.tile[aria-current="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.tile__icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex: none;
+}
+
+.tile__icon > svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.tile__icon--accent { background: var(--color-accent-soft); color: var(--color-accent); }
+.tile__icon--info { background: var(--color-info-soft); color: var(--color-info); }
+.tile__icon--success { background: var(--color-success-soft); color: var(--color-success); }
+.tile__icon--warning { background: var(--color-warning-soft); color: var(--color-warning); }
+.tile__icon--danger { background: var(--color-danger-soft); color: var(--color-danger); }
+
+.tile__title {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.tile__meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------------- badges and chips */
+/* Colour never carries the meaning alone: each badge also has its own label. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badge > svg {
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.badge--primary { background: var(--color-primary-soft); color: var(--color-primary); }
+.badge--success { background: var(--color-success-soft); color: var(--color-success); }
+.badge--warning { background: var(--color-warning-soft); color: var(--color-warning); }
+.badge--danger { background: var(--color-danger-soft); color: var(--color-danger); }
+.badge--info { background: var(--color-info-soft); color: var(--color-info); }
+.badge--outline { background: transparent; border-color: var(--color-border-strong); }
+
+.dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  flex: none;
+}
+
+/* A pill used for the total next to a section heading. */
+.count-pill {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+/* A visible label is always present. `.hint` explains the rule; the asterisk
+   marks a genuinely required field, for a screen reader as well as the eye. */
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.required {
+  color: var(--color-danger);
+  font-weight: var(--weight-bold);
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+.control {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-md);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.control::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.control:focus-visible {
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.control:disabled,
+.control[readonly] {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-subtle);
+  cursor: not-allowed;
+}
+
+textarea.control {
+  min-height: 6rem;
+  resize: vertical;
+  line-height: var(--leading-normal);
+}
+
+select.control {
+  appearance: none;
+  padding-inline-end: var(--space-6);
+  /* Inline chevron: an asset-free indicator that follows the theme. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 1.05rem center, right 0.75rem center;
+  background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+  background-repeat: no-repeat;
+}
+
+[dir="rtl"] select.control {
+  background-position: left 0.75rem center, left 1.05rem center;
+}
+
+/* Invalid state is shown with a ring *and* an icon in the message, so the signal
+   survives a colour-blind reader and a monochrome print. */
+.control[aria-invalid="true"] {
+  border-color: var(--color-danger);
+  box-shadow: var(--ring-danger);
+}
+
+.field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-danger);
+}
+
+.field-error > svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-block-start: 0.15rem;
+}
+
+/* Checkbox and radio keep the native control - keyboard and assistive-technology
+   behaviour for free - and only the visual box is restyled. */
+.check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.check > input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0.2rem 0 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex: none;
+}
+
+/* Segmented radio group for view switches and the appearance picker. Real
+   radios, so arrow keys work and the value is announced. */
+.segmented {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.segmented__option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.segmented__option:hover {
+  color: var(--color-text);
+}
+
+.segmented__option.is-active,
+.segmented__option:has(:checked) {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.segmented__option > input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.segmented__option > svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* ----------------------------------------------------------------- tables */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  /* A scroll container has to be keyboard-reachable or its content can be
+     unreachable on some browsers. */
+  overscroll-behavior-x: contain;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table caption {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  text-align: start;
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+
+.table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--layer-sticky);
+  background: var(--color-canvas-alt);
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+.table tbody tr:hover {
+  background: var(--color-canvas-alt);
+}
+
+.table__primary {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.table__sub {
+  display: block;
+  margin-block-start: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-subtle);
+}
+
+.table td:last-child,
+.table th:last-child {
+  white-space: nowrap;
+}
+
+.table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Below the tablet breakpoint a table stops being a table and becomes a stack
+   of labelled rows. Each header keeps its text as a data label, so no
+   information is lost - only the visual grid is. */
+@media (max-width: 860px) {
+  .table--responsive thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table--responsive tbody tr {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border-block-end: 1px solid var(--color-border-subtle);
+  }
+
+  .table--responsive tbody td,
+  .table--responsive tbody th {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 34%) 1fr;
+    gap: var(--space-3);
+    padding: 0;
+    border: 0;
+    white-space: normal;
+  }
+
+  .table--responsive tbody td::before,
+  .table--responsive tbody th::before {
+    content: attr(data-label);
+    color: var(--color-text-subtle);
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+}
+
+/* --------------------------------------------------------- data states */
+/* The four states a data-driven area can be in, and nothing else. A view that is
+   loading never shows content-shaped markup, so a placeholder can never be
+   mistaken for a record. */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-7) var(--space-5);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+  text-align: center;
+}
+
+.state__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-subtle);
+}
+
+.state__icon > svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.state__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.state__body {
+  max-width: 46ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.state--error {
+  border-style: solid;
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.state--error .state__icon {
+  background: var(--color-surface);
+  color: var(--color-danger);
+}
+
+.state--error .state__body {
+  color: var(--color-danger);
+}
+
+/* A state that replaces a table row instead of a whole block. */
+.state--inline {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  text-align: start;
+}
+
+/* --------------------------------------------------------- skeletons */
+/* Skeletons are deliberately abstract: a rounded bar, never a card outline with
+   a title and a badge, which is what made the old loading state readable as
+   real content. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: transparent;
+  user-select: none;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--layer-skeleton);
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-text) 7%, transparent),
+    transparent
+  );
+  animation: skeleton-sweep 1.4s var(--ease-out) infinite;
+}
+
+.skeleton--text { height: 0.75rem; width: 100%; }
+.skeleton--title { height: 1.1rem; width: 60%; }
+.skeleton--block { height: 7rem; border-radius: var(--radius-lg); }
+.skeleton--row { height: 2.75rem; border-radius: var(--radius-sm); }
+
+@keyframes skeleton-sweep {
+  to { transform: translateX(100%); }
+}
+
+/* One announcement for a group of bars, not one per bar. */
+.skeleton-group[aria-busy="true"] {
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------- notices */
+/* Inline banner for a page-level message. Always an icon plus text. */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-text-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  font-size: var(--text-sm);
+}
+
+.notice > svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-block-start: 0.1rem;
+  flex: none;
+}
+
+.notice--neutral { color: var(--color-text-muted); }
+.notice--info { border-color: var(--color-info); background: var(--color-info-soft); color: var(--color-info); }
+.notice--success { border-color: var(--color-success); background: var(--color-success-soft); color: var(--color-success); }
+.notice--warning { border-color: var(--color-warning); background: var(--color-warning-soft); color: var(--color-warning); }
+.notice--danger { border-color: var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger); }
+
+.notice__body {
+  min-width: 0;
+}
+
+.notice__title {
+  font-weight: var(--weight-semibold);
+}
+
+/* A transient message that replaces a form's status line after a mutation. */
+.message {
+  display: none;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.message:not(:empty) {
+  display: flex;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.message--success { background: var(--color-success-soft); color: var(--color-success); }
+.message--error { background: var(--color-danger-soft); color: var(--color-danger); }
+.message--info { background: var(--color-info-soft); color: var(--color-info); }
+
+/* ---------------------------------------------------------------- toasts */
+/* The region is created once by shared/ui.js and announced politely, so a
+   message never interrupts what a screen reader is currently saying. */
+.toast-region {
+  position: fixed;
+  inset-block-end: var(--space-5);
+  inset-inline-end: var(--space-5);
+  z-index: var(--layer-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(22rem, calc(100vw - var(--space-6)));
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  pointer-events: auto;
+  animation: toast-in var(--duration-base) var(--ease-spring) both;
+}
+
+.toast > svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-block-start: 0.15rem;
+  flex: none;
+}
+
+.toast--success { border-color: var(--color-success); color: var(--color-success); }
+.toast--error { border-color: var(--color-danger); color: var(--color-danger); }
+.toast--info { border-color: var(--color-info); color: var(--color-info); }
+.toast--leaving { animation: toast-out var(--duration-fast) var(--ease-out) both; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(0.75rem) scale(0.97); }
+}
+
+@keyframes toast-out {
+  to { opacity: 0; transform: translateY(0.5rem); }
+}
+
+/* --------------------------------------------------------------- dialogs */
+dialog.app-dialog {
+  width: min(38rem, calc(100vw - var(--space-6)));
+  max-height: min(85dvh, 50rem);
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  box-shadow: var(--shadow-pop);
+}
+
+dialog.app-dialog::backdrop {
+  background: var(--color-backdrop);
+  backdrop-filter: blur(3px);
+}
+
+.app-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+
+.app-dialog__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.app-dialog__body {
+  padding: var(--space-5);
+  overflow-y: auto;
+}
+
+.app-dialog__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5) var(--space-5);
+}
+
+/* A definition list of label/value pairs (event details). */
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.facts dt {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-semibold);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A label/value list that wraps as cards rather than as a grid. */
+.fact-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block-end: var(--space-3);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+
+.fact:last-child {
+  border-block-end: 0;
+  padding-block-end: 0;
+}
+
+.fact dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.fact dd {
+  margin: 0;
+  font-weight: var(--weight-medium);
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------- breadcrumbs */
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.breadcrumbs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.breadcrumbs__item > svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: none;
+}
+
+.breadcrumbs__item:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.breadcrumbs__item[aria-current="page"] {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  cursor: default;
+}
+
+.breadcrumbs__item[aria-current="page"]:hover {
+  background: none;
+}
+
+.breadcrumbs__sep {
+  display: inline-flex;
+  color: var(--color-text-subtle);
+  user-select: none;
+}
+
+.breadcrumbs__sep > svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* The chevron points the way the language reads, so it is mirrored with the page. */
+[dir="rtl"] .breadcrumbs__sep > svg {
+  transform: scaleX(-1);
+}
+
+/* ------------------------------------------------------------------ menu */
+/* The dropdown shared by the account menu and the notification bell. Opened with
+   aria-expanded on the trigger, closed on Escape or on an outside click. */
+.menu {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-2));
+  inset-inline-end: 0;
+  z-index: var(--layer-pop);
+  min-width: 15rem;
+  max-width: min(22rem, calc(100vw - var(--space-6)));
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-pop);
+  animation: menu-in var(--duration-fast) var(--ease-out) both;
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu__header {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+
+.menu__label {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.menu__empty {
+  padding: var(--space-3);
+}
+
+.menu__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.menu__item,
+.menu__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu__item:hover,
+.menu__link:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}
+
+.menu__item > svg,
+.menu__link > svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--color-text-subtle);
+  flex: none;
+}
+
+.menu__item--danger {
+  color: var(--color-danger);
+}
+
+.menu__item--danger:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.menu__item--danger > svg {
+  color: var(--color-danger);
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-0.35rem); }
+}
+
+/* ---------------------------------------------------------------- avatar */
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  flex: none;
+}
+
+.avatar--lg { width: 4rem; height: 4rem; font-size: var(--text-xl); }
+.avatar--xl { width: 5.5rem; height: 5.5rem; font-size: var(--text-2xl); }
+.avatar--accent { background: var(--color-accent-soft); color: var(--color-accent); }
+.avatar--info { background: var(--color-info-soft); color: var(--color-info); }
+
+/* ------------------------------------------------------------------ stats */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-3);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.stat__value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.stat__label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.stat__hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.stat--accent .stat__value { color: var(--color-primary); }
+.stat--warning .stat__value { color: var(--color-warning); }
+.stat--danger .stat__value { color: var(--color-danger); }
+.stat--success .stat__value { color: var(--color-success); }
+
+/* --------------------------------------------------------- meter / chart */
+/* A labelled progress bar. Used only where the value is genuinely a ratio. */
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.meter__track {
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.meter__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* The dashboard's activity chart, drawn by shared/ui/chart.js from the same
+   activity data the page shows, so a bar can never disagree with a table. */
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.chart__plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 9rem;
+  padding-block-start: var(--space-3);
+}
+
+.chart__col {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  min-width: 0;
+  height: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.chart__bar {
+  width: 100%;
+  max-width: 1.75rem;
+  min-height: 2px;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  background: var(--color-primary);
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.chart__col:hover .chart__bar,
+.chart__col:focus-visible .chart__bar {
+  opacity: 1;
+}
+
+.chart__bar--muted {
+  background: var(--color-border-strong);
+}
+
+.chart__axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-2xs);
+  color: var(--color-text-subtle);
+}
+
+/* ----------------------------------------------------------------- lists */
+/* A vertical stack of rows separated by hairlines, used where a table would be
+   too heavy (notifications, activity, search results). */
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rows > li + li {
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.row__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.row__title {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.row__sub {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+.row__meta > svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+}
+
+/* An unread row is marked by a leading bar *and* a text label, never colour
+   alone. */
+.row--unread {
+  background: var(--color-primary-soft);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+:root[dir="rtl"] .row--unread {
+  box-shadow: inset -3px 0 0 var(--color-primary);
+}
+
+/* -------------------------------------------------------------- toolbars */
+/* The filter row above a table or list. Wraps cleanly and never overlaps. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  margin-block-start: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+}
+
+.toolbar .field {
+  flex: 0 1 13rem;
+  min-width: 0;
+}
+
+.toolbar__spacer {
+  flex: 1 1 auto;
+}
+
+.search {
+  position: relative;
+  display: block;
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.search > svg {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: var(--space-3);
+  width: 1.05rem;
+  height: 1.05rem;
+  transform: translateY(-50%);
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.search > .control {
+  padding-inline-start: calc(var(--space-3) + 1.6rem);
+}
+
+/* ------------------------------------------------------------ pagination */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pagination__button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.pagination__button:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pagination__button[aria-current="page"] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.pagination__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------- tab strip */
+/* Horizontal section switcher inside a page. */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tab.is-active,
+.tab[aria-current="page"] {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.tab > svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* ------------------------------------------------------------- dropzone */
+/* The upload target. A real <label> over a real file input, so clicking it
+   opens the picker and the keyboard reaches it, with a drag state on top. */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-5);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              background-color var(--duration-fast) var(--ease-out);
+}
+
+.dropzone:hover,
+.dropzone:focus-within,
+.dropzone.is-dragging {
+  border-color: var(--color-primary);
+  border-style: solid;
+  background: var(--color-primary-soft);
+}
+
+.dropzone__icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.dropzone__icon > svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.dropzone__title {
+  font-weight: var(--weight-semibold);
+}
+
+.dropzone__hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+/* The native input stays in the DOM - that is what makes the label work and
+   what keeps it in the tab order - but is visually replaced. */
+.dropzone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropzone__files {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.dropzone__files > li {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------------- small helpers */
+.definition-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-4);
+}
+
+.definition-grid__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.definition-grid__label {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.definition-grid__value {
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   Guest-only page furniture: the landing hero and the numbered "how it works"
+   steps. Everything else comes from the shared layers above.
+   ========================================================================== */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-7) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(40rem 20rem at 88% 0%, var(--color-primary-soft) 0%, transparent 60%),
+    var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.hero[hidden] {
+  display: none;
+}
+
+.hero h1 {
+  max-width: 20ch;
+}
+
+.hero .lead {
+  max-width: 58ch;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: var(--space-5) var(--space-4);
+  }
+}
+
+.steps {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps > li {
+  counter-increment: step;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.steps > li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  flex: none;
+}
+
+/* The viewer owns its own styles in library.css; these two keep its chrome in
+   step with the rest of the system. */
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.viewer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.viewer__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.viewer__name {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  overflow-wrap: anywhere;
+}
+
+.viewer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.viewer__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.viewer__page {
+  min-width: 3.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+}
+
+.viewer__stage .state {
+  border-color: var(--color-border-strong);
+  background: transparent;
+}

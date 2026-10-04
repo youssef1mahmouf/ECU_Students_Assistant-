@@ -3,69 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>سجل النشاط · بوابة المجموعات</title>
+  <title>سجل النشاط</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.activity">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="admin.activity">سجل النشاط</p>
-      <h1 data-i18n="admin.events">الأحداث المسجّلة</h1>
-      <p class="subtext" data-i18n="admin.logNote">لا يتضمن السجل أي كلمات مرور. السجل في وضع SQLite لا يُمسح من الواجهة.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <div class="filter-bar">
-        <div class="field">
-          <label for="activityWho" data-i18n="admin.showWho">عرض</label>
-          <select id="activityWho">
-            <option value="" data-i18n="filter.all">الكل</option>
-            <option value="admin" data-i18n="filter.admin">إداري</option>
-            <option value="user" data-i18n="filter.students">الطلاب</option>
-          </select>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="admin.activity">سجل النشاط</p>
+            <h1 data-i18n="admin.events">الأحداث المسجّلة</h1>
+            <p class="lead" id="activityLead" data-i18n="admin.logNote">لا يتضمن السجل أي كلمات مرور. السجل في وضع SQLite لا يُمسح من الواجهة.</p>
+          </div>
         </div>
-        <div class="field">
-          <label for="activityActor" data-i18n="admin.actorLabel">الشخص</label>
-          <select id="activityActor"><option value="" data-i18n="admin.allActors">كل الأشخاص</option></select>
-        </div>
-        <div class="field">
-          <label for="activityLevel" data-i18n="field.level">المستوى</label>
-          <select id="activityLevel">
-            <option value="" data-i18n="filter.all">الكل</option>
-            <option value="auth" data-i18n="filter.auth">دخول</option>
-            <option value="security" data-i18n="filter.security">أمني</option>
-            <option value="admin" data-i18n="filter.admin">إداري</option>
-            <option value="info" data-i18n="filter.info">معلومة</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="activityLimit" data-i18n="field.limit">العدد</label>
-          <select id="activityLimit">
-            <option value="50">50</option>
-            <option value="100" selected>100</option>
-            <option value="250">250</option>
-            <option value="500">500</option>
-          </select>
-        </div>
-        <div class="field"><button class="btn secondary" id="refreshActivity" type="button" data-i18n="action.refresh">تحديث</button></div>
-      </div>
 
-      <ul class="log" id="activityList"><li data-i18n="msg.loading">جار التحميل…</li></ul>
-    </section>
+        <div class="toolbar">
+          <div class="field">
+            <label class="label" for="activityWho" data-i18n="admin.showWho">عرض</label>
+            <select class="control" id="activityWho">
+              <option value="" data-i18n="filter.all">الكل</option>
+              <option value="admin" data-i18n="filter.admin">إداري</option>
+              <option value="user" data-i18n="filter.students">الطلاب</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="activityActor" data-i18n="admin.actorLabel">الشخص</label>
+            <select class="control" id="activityActor"></select>
+          </div>
+          <div class="field">
+            <label class="label" for="activityLevel" data-i18n="field.level">المستوى</label>
+            <select class="control" id="activityLevel">
+              <option value="" data-i18n="filter.all">الكل</option>
+              <option value="auth" data-i18n="filter.auth">دخول</option>
+              <option value="security" data-i18n="filter.security">أمني</option>
+              <option value="admin" data-i18n="filter.admin">إداري</option>
+              <option value="info" data-i18n="filter.info">معلومة</option>
+            </select>
+          </div>
+          <span class="toolbar__spacer"></span>
+          <span class="count-pill" id="activityCount">0</span>
+        </div>
 
-    <dialog class="app-dialog" id="eventDialog" aria-labelledby="eventDialogTitle">
-      <h2 id="eventDialogTitle" data-i18n="admin.eventDetails">تفاصيل الحدث</h2>
-      <dl id="eventBody"></dl>
-      <div class="dialog-actions">
-        <button class="btn secondary" type="button" id="eventClose" data-i18n="action.close">إغلاق</button>
-      </div>
-    </dialog>
-  </main>
+        <!-- id="activityList" is asserted by backend/scripts/page-smoke.js -->
+        <div id="activityList"></div>
 
-  <footer class="shell" id="appFooter"></footer>
+        <dialog class="app-dialog" id="eventDialog" aria-labelledby="eventDialogTitle">
+          <div class="app-dialog__head">
+            <h2 class="app-dialog__title" id="eventDialogTitle" data-i18n="admin.eventDetails">تفاصيل الحدث</h2>
+            <button class="icon-btn" type="button" id="eventClose" data-i18n-label="action.close" aria-label="إغلاق">
+              <svg viewBox="0 0 24 24" width="1.15rem" height="1.15rem" aria-hidden="true" focusable="false">
+                <path d="M18 6 6 18M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="app-dialog__body"><dl class="facts" id="eventBody"></dl></div>
+        </dialog>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/activity.js"></script>
 </body>
 </html>

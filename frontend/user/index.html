@@ -1,38 +1,68 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f5f7f2">
-  <title>الرئيسية · بوابة المجموعات</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="robots" content="noindex">
+  <title>لوحة الطالب</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/user/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.home">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <div id="userBanner"></div>
-    <section class="surface">
-      <p class="eyebrow" data-i18n="nav.home">الرئيسية</p>
-      <h1 data-i18n="user.welcome">أهلًا بك في مساحة مجموعتك</h1>
-      <p class="subtext" id="homeLead" data-i18n="user.lead">المحتوى الذي يضيفه الأدمن لمجموعتك فقط.</p>
-    </section>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-    <section class="surface" aria-labelledby="my-groups">
-      <h2 id="my-groups" data-i18n="user.groupsAvailable">المجموعات المتاحة</h2>
-      <div class="group-grid" id="groupCards"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-    </section>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
 
-    <section class="surface" aria-labelledby="my-content">
-      <h2 id="my-content" data-i18n="user.myContent">محتوى مجموعتي</h2>
-      <div class="list" id="myRecords"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-    </section>
-  </main>
+      <main class="page" id="main">
+        <div id="userBanner"></div>
 
-  <footer class="shell" id="appFooter"></footer>
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.home">الرئيسية</p>
+            <h1 data-i18n="user.welcome">أهلًا بك</h1>
+            <p class="lead" id="homeLead"></p>
+          </div>
+          <div class="page-head__actions">
+            <a class="btn btn--secondary" href="/user/library/" data-i18n="nav.library">المكتبة</a>
+            <a class="btn btn--primary" href="/user/documents/" data-i18n="nav.documents">الملفات</a>
+          </div>
+        </div>
+
+        <section class="page__section" aria-labelledby="dash-stats">
+          <h2 class="visually-hidden" id="dash-stats" data-i18n="user.overview">نظرة سريعة</h2>
+          <div id="dashStats"></div>
+        </section>
+
+        <section class="page__section" aria-labelledby="dash-content">
+          <div class="section__head">
+            <h2 id="dash-content" data-i18n="user.myContent">محتوى مجموعتي</h2>
+            <span class="count-pill" id="recordCount">0</span>
+          </div>
+          <div id="myRecords"></div>
+        </section>
+
+        <section class="page__section" aria-labelledby="dash-library">
+          <div class="section__head">
+            <h2 id="dash-library" data-i18n="library.title">مكتبة المواد</h2>
+            <a class="small" href="/user/library/" data-i18n="action.openLibrary">افتح المكتبة</a>
+          </div>
+          <div id="libraryPeek"></div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/user/scripts/home.js"></script>
 </body>
 </html>
-

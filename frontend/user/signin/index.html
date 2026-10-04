@@ -1,74 +1,84 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسجيل الدخول · بوابة المجموعات</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <title>تسجيل الدخول</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/user/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.signin">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell narrow">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="nav.signin">تسجيل الدخول</p>
-      <h1 data-i18n="user.signinTitle">سجّل الدخول إلى حسابك</h1>
-      <p class="subtext" data-i18n="user.signinNote">ابدأ ببريدك الجامعي، ثم تظهر لك خطوة كلمة المرور.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <!-- Step 1: the address decides whether this portal knows you at all. -->
-      <form id="emailStep" novalidate>
-        <div class="form-grid">
-          <div class="field full">
-            <label for="loginEmail" data-i18n="field.email">البريد الإلكتروني</label>
-            <input id="loginEmail" name="email" type="email" inputmode="email" autocomplete="username"
-                   placeholder="192600250@ecu.edu.eg" required data-i18n-placeholder="field.emailExample">
-            <span class="hint" data-i18n="user.emailStepHint">استخدم بريدك الجامعي فقط، بدون مسافات.</span>
+    <div class="app__body app__body--no-nav">
+      <main class="page" id="main" style="width:min(100%,32rem)">
+        <section class="card" style="padding:var(--space-6)">
+          <p class="eyebrow" data-i18n="nav.signin">تسجيل الدخول</p>
+          <h1 style="margin-block:var(--space-2) var(--space-2)" data-i18n="user.signinTitle">سجّل الدخول إلى حسابك</h1>
+          <p class="muted small" data-i18n="user.signinNote">ابدأ ببريدك الجامعي، ثم تظهر لك خطوة كلمة المرور.</p>
+
+          <!-- Step 1: the address decides whether this portal knows you at all.
+               No password field exists in the DOM until the server has answered,
+               so the page cannot offer one before it is meant to. -->
+          <form id="emailStep" novalidate>
+            <div class="field" style="margin-block:var(--space-4)">
+              <label class="label" for="loginEmail" data-i18n="field.email">البريد الإلكتروني</label>
+              <input class="control" id="loginEmail" name="email" type="email" inputmode="email"
+                     autocomplete="username" dir="ltr" required
+                     data-i18n-placeholder="field.emailExample" placeholder="192600250@ecu.edu.eg">
+              <span class="hint" data-i18n="user.emailStepHint">استخدم بريدك الجامعي فقط، بدون مسافات.</span>
+            </div>
+            <div class="cluster">
+              <button class="btn btn--primary" type="submit" id="emailContinue" data-i18n="action.continue">متابعة</button>
+              <a class="btn btn--secondary" href="/user/register/" data-i18n="action.setPassword">إنشاء كلمة مرور</a>
+            </div>
+          </form>
+
+          <!-- Step 2: only for an address the server accepted in step 1. -->
+          <form id="passwordStep" hidden>
+            <div class="notice notice--neutral" style="margin-block-end:var(--space-4)">
+              <p class="notice__body">
+                <span id="signInAs"></span>
+                <button class="btn btn--ghost btn--sm" type="button" id="changeEmail"
+                        style="margin-inline-start:var(--space-2)" data-i18n="action.changeEmail">تغيير البريد</button>
+              </p>
+            </div>
+            <div class="field">
+              <label class="label" for="loginPassword" data-i18n="field.password">كلمة المرور</label>
+              <input class="control" id="loginPassword" name="password" type="password"
+                     autocomplete="current-password" required>
+            </div>
+            <label class="check" style="margin-block:var(--space-3)">
+              <input type="checkbox" name="remember" checked>
+              <span data-i18n="field.remember">تذكرني</span>
+            </label>
+            <button class="btn btn--primary btn--block" type="submit" id="loginSubmit" data-i18n="nav.signin">
+              تسجيل الدخول</button>
+          </form>
+
+          <!-- A rostered address with no password yet is sent to the setup page. -->
+          <div id="setupStep" hidden>
+            <p class="muted small" data-i18n="user.noPasswordYet">لا توجد كلمة مرور لهذا البريد بعد.</p>
+            <a class="btn btn--primary btn--block" id="setupLink" href="/user/register/" data-i18n="action.setPassword">
+              إنشاء كلمة مرور</a>
           </div>
-        </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="emailContinue" data-i18n="action.continue">متابعة</button>
-          <a class="btn secondary" href="/user/register/" data-i18n="action.setPassword">إنشاء كلمة مرور</a>
-        </div>
-      </form>
 
-      <!-- Step 2: only shown for an address the server accepted in step 1. -->
-      <form id="passwordStep" hidden>
-        <div class="form-grid">
-          <div class="field full">
-            <span class="hint">
-              <span id="signInAs"></span>
-              <button class="btn secondary" type="button" id="changeEmail" data-i18n="action.changeEmail">تغيير البريد</button>
-            </span>
-          </div>
-          <div class="field full">
-            <label for="loginPassword" data-i18n="field.password">كلمة المرور</label>
-            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
-          </div>
-          <div class="field full">
-            <label class="checkbox"><input type="checkbox" name="remember" checked>
-              <span data-i18n="field.remember">تذكرني (يبقى تسجيل الدخول حتى تسجيل الخروج)</span></label>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="loginSubmit" data-i18n="nav.signin">تسجيل الدخول</button>
-        </div>
-      </form>
+          <p class="message" id="loginMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+        </section>
+      </main>
+    </div>
 
-      <!-- A rostered address that has no password yet is sent to the first-password page. -->
-      <div id="setupStep" hidden>
-        <p class="subtext" data-i18n="user.noPasswordYet">لا توجد كلمة مرور لهذا البريد بعد. أنشئ كلمة مرور للمتابعة.</p>
-        <div class="actions">
-          <a class="btn" id="setupLink" href="/user/register/" data-i18n="action.setPassword">إنشاء كلمة مرور</a>
-        </div>
-      </div>
+    <footer class="footer" id="appFooter"></footer>
+  </div>
 
-      <p class="message" id="loginMessage" role="status" aria-live="polite"></p>
-    </section>
-  </main>
-
-  <footer class="shell" id="appFooter"></footer>
   <script type="module" src="/user/scripts/signin.js"></script>
 </body>
 </html>

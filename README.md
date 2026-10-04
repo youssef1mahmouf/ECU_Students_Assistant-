@@ -7,6 +7,124 @@ one group, and an administrator area for groups, content, accounts, activity and
 - **Backend:** Express API (`backend/src/`) with server-side sessions, CSRF, rate limiting.
 - **Data:** MongoDB Atlas when credentials exist, otherwise a local JSON file store.
 
+## The frontend (2026 redesign)
+
+One design system, one application shell, one way to express each of the four states a
+data-driven area can be in. It is documented here because it is not obvious from a file
+listing.
+
+### One design system, no colours outside the token file
+
+| File | Owns |
+| --- | --- |
+| `shared/tokens.css` | **every** colour, space, radius, shadow, type size, duration and layer index |
+| `shared/base.css` | reset, document rhythm, focus, a11y utilities, layout helpers |
+| `shared/components.css` | buttons, cards, tiles, forms, tables, states, toasts, dialogs |
+| `shared/shell.css` | the app frame: topbar, sidebar, page column, footer |
+| `shared/library.css` | the resource explorer and the viewer, nothing else |
+
+The palette is "Meridian": a deep violet primary with an ember accent, written for this
+project rather than inherited from a template. Both modes were measured against WCAG AA
+(4.5:1 body text, 3:1 for large text and UI borders); the measured ratio is recorded
+beside each token.
+
+`npm run check` runs `frontend/csscheck.mjs`, which fails the build if a component
+stylesheet hard-codes a colour. That is what makes the theme switch one attribute on
+`<html>` instead of a partly-maintained override - and it is what caught the dark palette
+being silently swallowed by an unclosed brace during this work.
+
+### The shell
+
+`shared/shell.js` draws the header, the sidebar and the footer for **all three areas**.
+The contract with a page is three empty regions:
+
+```html
+<header class="topbar" id="appHeader"></header>
+<aside   class="sidebar" id="appSidebar"></aside>   <!-- optional -->
+<footer  class="footer"  id="appFooter"></footer>
+```
+
+Everything else on a page is written by that page's own view module, so no UI exists
+without an understandable source. The route table lives in exactly one place,
+`shared/nav.js`, and `backend/src/app.js` mirrors its `cap` fields in its page guards.
+
+### Four states, one component
+
+`shared/ui/view.js` turns a promise into pixels and supports exactly four states:
+loading (a skeleton that deliberately does **not** look like content), empty, error
+(with a Retry that re-runs the loader), and success. Every list, table, tile grid and
+stat row goes through it, which is what removed the "loading card that looked like a
+resource card" problem. A view also repaints itself on a language switch.
+
+### One library, one source
+
+| Route | Endpoint | Shows |
+| --- | --- | --- |
+| `/user/library/` | `GET /api/public/material-library` | the shared teaching-material index |
+| `/user/documents/` | `GET /api/documents` | files uploaded to the caller's own group |
+| `/user/viewer/` | either of the above | one file, inside the application |
+
+These used to share a page, drawn by two modules over two data sets, which produced the
+duplicate library cards. They are now three pages with three single-purpose renderers,
+and `npm run verify:browser` asserts that the documents page contains no folder tree.
+
+The open folder is the `?p=` query parameter and every folder is a real link, so a
+folder can be bookmarked and the browser Back button walks the trail.
+
+### Notifications
+
+The backend has no notifications table and none was invented. Every item is derived
+from an endpoint the reader could call directly: the recorded activity log for staff,
+the caller's own published content for a student. Read state is a single ISO timestamp in
+`localStorage`; no token, role or account data is stored, and marking something read
+reveals nothing the reader could not already open.
+
+### Libraries
+
+| Library | Why | Why not something else |
+| --- | --- | --- |
+| `lucide-static` (ISC) | icons, inline so a glyph costs no request and inherits `currentColor` | sprite `<use>` has cross-browser quirks; hand-drawn icons would drift |
+| `pdfjs-dist` (Apache-2.0) | in-app PDF rendering on the viewer route, fetched on demand | the native PDF plugin opens a viewer the app cannot style |
+
+Deliberately **not** added:
+
+- **A charting library.** The dashboard draws three bar series of at most fourteen bars
+  from numbers the server already computed. `shared/ui/chart.js` is ~40 lines and matches
+  the token system exactly; Chart.js would add ~200 KB to every admin page load to draw
+  the same rectangles with different defaults.
+- **A date library.** `Intl.DateTimeFormat` and `Intl.RelativeTimeFormat` are built in,
+  localised, and smaller than any package.
+- **A virtual list.** The largest index is a few hundred rows; pagination is enough.
+- **A toast library.** A polite live region plus four components is less code and no
+  dependency.
+- **A framework.** The architecture is native ES modules; a framework would have meant a
+  migration and a bundler.
+
+Both libraries are **vendored into `frontend/shared/vendor/` by `npm run vendor`** and
+committed. The server sends `default-src 'self'; script-src 'self'`, so a CDN `<script>`
+would be blocked; vendoring also means a machine that never ran `npm install` inside
+`frontend/` still gets a working application.
+
+### Appearance
+
+Light, dark and "match the system", plus a compact density and a reduced-motion switch.
+The choice is one JSON value in `localStorage` under `ecu.appearance` - a display
+preference, never a secret. `shared/theme-boot.js` is the only classic (non-module)
+script and the only reason there is no white flash on navigation in dark mode.
+
+### Accessibility
+
+- Semantic landmarks, one `<h1>` per page, a real `<form>` element per step.
+- One focus treatment everywhere; `:focus-visible` keeps it off mouse clicks.
+- A skip link, a keyboard-reachable drawer, Escape closes every menu and dialog.
+- Status is never carried by colour alone: badges have labels, an unread row has a bar
+  **and** the word "unread", and every button names its intent.
+- `prefers-reduced-motion` and an explicit reduced-motion setting are both honoured, from
+  the token file so no component can forget.
+- Tables become labelled row stacks under 860px, keeping each header cell as a data
+  label.
+
+---
 ## Quick start
 
 ```bash
@@ -34,6 +152,15 @@ create the first super admin, then `npm start`).
 | `/admin/problems/` | problem reports submitted by users (reporter, time, page, category, description, status) |
 | `/admin/information/` | title, tagline and about text shown on the public page |
 | `/admin/profile/` | own name, roster identity (read-only) and own password |
+| `/admin/library/` | the shared material index, for staff (same explorer as the student page) |
+| `/admin/notifications/` | system and security events, most severe first |
+| `/admin/security/` | sign-in and security events only |
+| `/admin/health/` | `GET /api/health`, exactly as the server reports it |
+| `/admin/settings/` | display preferences, shared with the student settings page |
+| `/user/library/` | the shared teaching-material index: subjects, weeks, sessions, files |
+| `/user/viewer/` | one PDF, image, video, audio or text file, inside the application |
+| `/user/notifications/` | what was published to the caller's own group |
+| `/user/settings/` | theme, density, motion and language |
 
 ## npm scripts
 
@@ -44,7 +171,11 @@ create the first super admin, then `npm start`).
 | `npm run test:db` | Atlas reachability probe; result written to `test-conn.log` |
 | `npm run check` | syntax-check every backend file |
 | `npm run verify` | **117 permission, security and multi-group checks** against an isolated temp store |
-| `npm run verify:pages` | **65 checks** that every page/asset is served and capability-guarded |
+| `npm run verify:pages` | **117 checks** that every page/asset is served and capability-guarded |
+| `npm run verify:browser` | **472 checks** driving the real Chrome/Edge over every page, in light and dark, at desktop and phone widths |
+| `npm run verify:all` | all of the above, in order |
+| `cd frontend && npm run check` | syntax, stylesheet integrity and the bilingual key audit |
+| `cd frontend && npm run build` | vendors the two libraries, validates every page reference, emits `dist/` |
 | `node backend/scripts/i18n-audit.js` | bilingual audit of every key, reference and page |
 | `npm run extract:roster -- <pdf…>` | read the group PDFs into `backend/data_base/roster.<name>.json` + review report |
 | `npm run import:roster` | import that roster document (`--dry-run`, `--store=file`, `--json=<path>`) |

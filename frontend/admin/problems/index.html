@@ -3,57 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>البلاغات · بوابة المجموعات</title>
+  <title>البلاغات</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.problems">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="admin.problems">البلاغات</p>
-      <h1 data-i18n="admin.problemsManage">بلاغات المشاكل</h1>
-      <p class="subtext" data-i18n="admin.problemsNote">بلاغات المستخدمين المحفوظة مع المُبلِّغ والوقت والصفحة والتصنيف.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <div class="filter-bar">
-        <div class="field">
-          <label for="problemStatusFilter" data-i18n="admin.problemStatus">الحالة</label>
-          <select id="problemStatusFilter">
-            <option value="" data-i18n="filter.all">الكل</option>
-            <option value="open" data-i18n="state.open">مفتوح</option>
-            <option value="resolved" data-i18n="state.resolved">تم الحل</option>
-          </select>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="admin.problems">البلاغات</p>
+            <h1 data-i18n="admin.problemsManage">بلاغات المشاكل</h1>
+            <p class="lead" data-i18n="admin.problemsNote">بلاغات المستخدمين المحفوظة مع المُبلِّغ والوقت والصفحة والتصنيف.</p>
+          </div>
         </div>
-        <div class="field"><button class="btn secondary" id="refreshProblems" type="button" data-i18n="action.refresh">تحديث</button></div>
-      </div>
 
-      <div class="table-wrap">
-        <table>
-          <caption id="problemsCaption" data-i18n="admin.problemList">قائمة البلاغات</caption>
-          <thead>
-            <tr>
-              <th scope="col" data-i18n="admin.problemReporter">المُبلِّغ</th>
-              <th scope="col" data-i18n="admin.problemTime">الوقت</th>
-              <th scope="col" data-i18n="admin.problemCategory">التصنيف</th>
-              <th scope="col" data-i18n="admin.problemDescription">الوصف</th>
-              <th scope="col" data-i18n="admin.problemPage">الصفحة</th>
-              <th scope="col" data-i18n="admin.problemStatus">الحالة</th>
-              <th scope="col" data-i18n="field.actions">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="problemRows">
-            <tr><td colspan="7" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="message" id="problemMessage" role="status" aria-live="polite"></p>
-    </section>
-  </main>
+        <div class="toolbar">
+          <div class="field">
+            <label class="label" for="problemStatusFilter" data-i18n="admin.problemStatus">الحالة</label>
+            <select class="control" id="problemStatusFilter">
+              <option value="" data-i18n="filter.all">الكل</option>
+              <option value="open" data-i18n="state.open">مفتوح</option>
+              <option value="resolved" data-i18n="state.resolved">تم الحل</option>
+            </select>
+          </div>
+          <span class="toolbar__spacer"></span>
+          <span class="count-pill" id="problemCount">0</span>
+        </div>
 
-  <footer class="shell" id="appFooter"></footer>
+        <!-- id="problemRows" is asserted by backend/scripts/page-smoke.js -->
+        <div id="problemRows"></div>
+        <p class="message" id="problemMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/problems.js"></script>
 </body>
 </html>

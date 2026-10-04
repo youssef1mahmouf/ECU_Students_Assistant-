@@ -1,0 +1,306 @@
+﻿/* ==========================================================================
+   The resource explorer and the in-app viewer.
+
+   Only these two features get their own stylesheet, because only these two have
+   a layout the generic grid cannot express: a breadcrumb trail over a folder
+   tree, and a media surface that has to fill the remaining height without
+   breaking out of the page column.
+   ========================================================================== */
+
+/* ------------------------------------------------------------- explorer */
+.library {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The trail sits directly above the content it describes and repeats the
+   current level as a non-link, so a screen reader can announce the position. */
+.library__trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.library__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.library__summary b {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Folder tiles. One grid for every level, so the shape of the library is
+   learned once and never changes as you drill down. */
+.library__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-3);
+}
+
+.library__folder {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out);
+}
+
+.library__folder:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+  color: inherit;
+}
+
+.library__folder-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex: none;
+}
+
+.library__folder-icon svg { width: 1.35rem; height: 1.35rem; }
+
+.library__folder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.library__folder-name {
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.library__folder-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.library__folder-chevron {
+  color: var(--color-text-subtle);
+  flex: none;
+}
+
+[dir="rtl"] .library__folder-chevron {
+  transform: scaleX(-1);
+}
+
+/* File rows. A list rather than a grid: names vary a lot in length and a list
+   stays readable when they do. */
+.library__files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.library__file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+
+.library__file:last-child { border-block-end: 0; }
+.library__file:hover { background: var(--color-canvas-alt); }
+
+.library__file-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  flex: none;
+}
+
+.library__file-icon svg { width: 1.15rem; height: 1.15rem; }
+.library__file-icon--pdf { background: var(--color-danger-soft); color: var(--color-danger); }
+.library__file-icon--image { background: var(--color-success-soft); color: var(--color-success); }
+.library__file-icon--video,
+.library__file-icon--audio { background: var(--color-primary-soft); color: var(--color-primary); }
+
+.library__file-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.library__file-name {
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.library__file-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+.library__file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex: none;
+}
+
+/* Search results reuse the file row, with the folder location in place of the
+   type badge so a hit always says where it lives. */
+.library__hit-location {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- viewer */
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.viewer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.viewer__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.viewer__name {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  overflow-wrap: anywhere;
+}
+
+.viewer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* The stage fills the remaining column height so a page is not a letterbox on
+   a laptop and does not overflow on a phone. */
+.viewer__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: min(70vh, 40rem);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.viewer__stage canvas,
+.viewer__stage img,
+.viewer__stage video {
+  max-width: 100%;
+  max-height: calc(80vh - 4rem);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.viewer__stage video {
+  width: 100%;
+  background: #000;
+}
+
+.viewer__stage audio {
+  width: min(100%, 34rem);
+}
+
+.viewer__stage pre {
+  width: 100%;
+  max-height: 70vh;
+  overflow: auto;
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+/* Toolbar shown only while a PDF is open. */
+.viewer__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.viewer__page {
+  min-width: 3.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+}
+
+/* One shared empty/failed panel for the stage. */
+.viewer__stage .state {
+  border-color: var(--color-border-strong);
+  background: transparent;
+}

@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
+  <meta name="robots" content="noindex">
+  <title>الإشعارات</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
+  <link rel="stylesheet" href="/shared/base.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
+</head>
+<body data-page-title="title.notifications">
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
+
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
+
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
+
+      <main class="page" id="main">
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.notifications">الإشعارات</p>
+            <h1 data-i18n="notif.title">الإشعارات</h1>
+            <p class="lead" data-i18n="notif.sourceNote">مبنية على السجل الفعلي في الخادم.</p>
+          </div>
+          <div class="page-head__actions">
+            <div class="segmented" role="group" id="notifFilter">
+              <button class="segmented__option is-active" type="button" data-level="" aria-pressed="true">
+                <span data-i18n="notif.filterAll">الكل</span></button>
+              <button class="segmented__option" type="button" data-level="security" aria-pressed="false">
+                <span data-i18n="level.security">أمني</span></button>
+              <button class="segmented__option" type="button" data-level="content" aria-pressed="false">
+                <span data-i18n="level.content">محتوى</span></button>
+            </div>
+            <button class="btn btn--secondary" type="button" id="notifRefresh">
+              <svg viewBox="0 0 24 24" width="1.05rem" height="1.05rem" aria-hidden="true" focusable="false">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                <path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                <path d="M8 16H3v5"></path>
+              </svg>
+              <span data-i18n="action.refresh">تحديث</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="cluster cluster--between">
+          <span class="count-pill" id="notifCount">0</span>
+          <button class="btn btn--ghost btn--sm" type="button" id="notifMarkRead" data-i18n="notif.markRead">
+            تعليم الكل كمقروء</button>
+        </div>
+
+        <div id="notificationList"></div>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
+  <script type="module" src="/user/scripts/notifications.js"></script>
+</body>
+</html>

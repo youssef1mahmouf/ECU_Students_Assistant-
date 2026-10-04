@@ -1,67 +1,87 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>حساب جديد · بوابة المجموعات</title>
+  <meta name="theme-color" content="#f6f5fb">
+  <title>إنشاء كلمة مرور</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/user/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.register">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell narrow">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="nav.register">حساب جديد</p>
-      <h1 data-i18n="user.newAccount">أنشئ كلمة المرور الأولى</h1>
-      <p class="subtext" data-i18n="user.newAccountNote">
-        أدخل بريدك الجامعي الموجود في القائمة المعتمدة. الاسم والمجموعة يؤخذان من القائمة، لا من هذا النموذج.
-      </p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <form id="registerForm" novalidate>
-        <div class="form-grid">
-          <div class="field full">
-            <label for="newEmail" data-i18n="field.email">البريد الإلكتروني</label>
-            <input id="newEmail" name="email" type="email" inputmode="email" autocomplete="username"
-                   placeholder="192600250@ecu.edu.eg" required data-i18n-placeholder="field.emailExample">
-            <span class="hint" data-i18n="user.registerEmailHint">يتم فحص البريد في الخادم مقابل القائمة المعتمدة.</span>
-            <div class="actions">
-              <button class="btn secondary" type="button" id="sendCode" data-i18n="action.sendCode">إرسال رمز تحقق</button>
+    <div class="app__body app__body--no-nav">
+      <main class="page" id="main" style="width:min(100%,32rem)">
+        <section class="card" style="padding:var(--space-6)">
+          <p class="eyebrow" data-i18n="nav.register">حساب جديد</p>
+          <h1 style="margin-block:var(--space-2) var(--space-2)" data-i18n="user.registerTitle">
+            إنشاء كلمة مرور</h1>
+          <p class="muted small" data-i18n="user.registerNote">
+            التسجيل مغلق؛ يُقبل فقط البريد المدرج في القائمة الرسمية.</p>
+
+          <form id="registerForm" novalidate>
+            <div class="field" style="margin-block:var(--space-4)">
+              <label class="label" for="newEmail" data-i18n="field.email">البريد الإلكتروني</label>
+              <input class="control" id="newEmail" name="email" type="email" inputmode="email"
+                     autocomplete="username" dir="ltr" required
+                     data-i18n-placeholder="field.emailExample" placeholder="192600250@ecu.edu.eg">
             </div>
-          </div>
-          <div class="field full">
-            <label for="emailCode" data-i18n="field.emailCode">رمز التحقق</label>
-            <div class="actions">
-              <input id="emailCode" name="emailCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="123456" dir="ltr">
-              <button class="btn secondary" type="button" id="verifyCode" data-i18n="action.verifyCode">تأكيد الرمز</button>
+
+            <!-- The six-digit code step is shown only after the server accepts
+                 the address. Same rule as the password step on the sign-in page. -->
+            <div class="field" id="codeStep" hidden style="margin-block-end:var(--space-4)">
+              <label class="label" for="emailCode" data-i18n="field.code">رمز التحقق</label>
+              <div class="cluster cluster--tight">
+                <input class="control" id="emailCode" name="code" type="text" inputmode="numeric"
+                       pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" dir="ltr"
+                       placeholder="000000" style="flex:1 1 8rem">
+                <button class="btn btn--secondary" type="button" id="sendCode" data-i18n="action.sendCode">
+                  إرسال الرمز</button>
+                <button class="btn btn--secondary" type="button" id="verifyCode" data-i18n="action.verifyCode">
+                  تأكيد الرمز</button>
+              </div>
+              <span class="hint" data-i18n="user.codeHint">أرسل الرمز إلى بريدك ثم أدخله هنا.</span>
             </div>
-            <span class="hint" data-i18n="user.emailCodeHint">أدخل الرمز المكوّن من 6 أرقام الذي وصلك على البريد.</span>
-          </div>
-          <div class="field">
-            <label for="newPassword" data-i18n="field.password">كلمة المرور</label>
-            <input id="newPassword" name="password" type="password" autocomplete="new-password" required>
-            <span class="hint" data-i18n="field.passwordHint">8 أحرف على الأقل، مع حرف كبير ورقم ورمز مثل @.</span>
-          </div>
-          <div class="field">
-            <label for="newPasswordConfirm" data-i18n="field.confirmPassword">تأكيد كلمة المرور</label>
-            <input id="newPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" required>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="registerSubmit" data-i18n="action.create">إنشاء</button>
-          <a class="btn secondary" href="/user/signin/" data-i18n="action.haveAccount">لدي حساب بالفعل</a>
-        </div>
-        <p class="message" id="registerMessage" role="status" aria-live="polite"></p>
-      </form>
 
-      <p class="hint" data-i18n="user.registerApprovalNote">
-        بعد الإنشاء يعتمد الأدمن عضويتك في المجموعة قبل فتح المحتوى.
-      </p>
-    </section>
-  </main>
+            <div class="field" id="passwordStep" hidden>
+              <label class="label" for="newPassword" data-i18n="field.password">كلمة المرور</label>
+              <input class="control" id="newPassword" name="password" type="password"
+                     autocomplete="new-password" minlength="8" required>
+              <span class="hint" data-i18n="field.passwordPolicy">
+                حرف كبير ورقم ورمز، 8 أحرف على الأقل.</span>
+            </div>
+            <div class="field" id="confirmStep" hidden>
+              <label class="label" for="newPasswordConfirm" data-i18n="field.passwordConfirm">
+                تأكيد كلمة المرور</label>
+              <input class="control" id="newPasswordConfirm" name="passwordConfirm" type="password"
+                     autocomplete="new-password" minlength="8" required>
+            </div>
 
-  <footer class="shell" id="appFooter"></footer>
+            <div class="cluster" style="margin-block-start:var(--space-4)">
+              <button class="btn btn--primary" type="submit" id="registerSubmit" data-i18n="action.createPassword">
+                إنشاء كلمة المرور</button>
+            </div>
+            <p class="message" id="registerMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+          </form>
+
+          <p class="tiny subtle" style="margin-block-start:var(--space-4)" data-i18n="user.registerApprovalNote">
+            بعد الإنشاء يعتمد الأدمن عضويتك في المجموعة قبل فتح المحتوى.</p>
+          <a class="small" href="/user/signin/" data-i18n="action.haveAccount">لدي حساب بالفعل</a>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/user/scripts/register.js"></script>
 </body>
 </html>

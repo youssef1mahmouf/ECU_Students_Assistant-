@@ -3,109 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>المواد · بوابة المجموعات</title>
+  <title>المواد</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.subjects">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="admin.subjects">المواد</p>
-      <h1 data-i18n="admin.subjectsManage">إدارة المواد</h1>
-      <p class="subtext" data-i18n="admin.subjectsNote">المواد تنظّم ملفات كل مجموعة. المرجع المختصر يُستخدم في مسار التخزين ولا يتغيّر بعد الإنشاء.</p>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-      <div class="table-wrap">
-        <table>
-          <caption id="subjectsCaption" data-i18n="admin.subjectList">قائمة المواد</caption>
-          <thead>
-            <tr>
-              <th scope="col" data-i18n="field.reference">المرجع</th>
-              <th scope="col" data-i18n="field.code">الرمز</th>
-              <th scope="col" data-i18n="field.nameEn">الاسم بالإنجليزية</th>
-              <th scope="col" data-i18n="field.nameAr">الاسم بالعربية</th>
-              <th scope="col" data-i18n="field.files">الملفات</th>
-              <th scope="col" data-i18n="field.status">الحالة</th>
-              <th scope="col" data-i18n="field.actions">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="subjectRows">
-            <tr><td colspan="7" class="empty" data-i18n="msg.loading">جار التحميل…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="message" id="subjectMessage" role="status" aria-live="polite"></p>
-    </section>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
 
-    <dialog class="app-dialog" id="subjectDialog" aria-labelledby="subjectDialogTitle">
-      <h2 id="subjectDialogTitle" data-i18n="admin.editSubject">تعديل المادة</h2>
-      <form id="subjectEditForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="editSubjectCode" data-i18n="field.code">الرمز</label>
-            <input id="editSubjectCode" name="code" maxlength="20">
-          </div>
-          <div class="field full">
-            <label for="editSubjectReference" data-i18n="field.reference">المرجع</label>
-            <input id="editSubjectReference" name="slug" maxlength="48" disabled>
-          </div>
-          <div class="field">
-            <label for="editSubjectNameEn" data-i18n="field.nameEn">الاسم بالإنجليزية</label>
-            <input id="editSubjectNameEn" name="nameEn" maxlength="120" required>
-          </div>
-          <div class="field">
-            <label for="editSubjectNameAr" data-i18n="field.nameAr">الاسم بالعربية</label>
-            <input id="editSubjectNameAr" name="nameAr" maxlength="120">
-          </div>
-          <div class="field full">
-            <label for="editSubjectDescription" data-i18n="field.description">الوصف</label>
-            <input id="editSubjectDescription" name="description" maxlength="300">
-          </div>
-          <div class="field full">
-            <label class="check" for="editSubjectActive">
-              <input id="editSubjectActive" name="active" type="checkbox">
-              <span data-i18n="state.active">نشط</span>
-            </label>
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="nav.subjects">المواد</p>
+            <h1 data-i18n="admin.subjectsManage">إدارة المواد</h1>
+            <p class="lead" data-i18n="admin.subjectsNote">المواد تنظّم ملفات كل مجموعة. المرجع المختصر يسمّي مجلد التخزين ولا يتغيّر بعد الإنشاء.</p>
           </div>
         </div>
-        <div class="dialog-actions">
-          <button class="btn secondary" type="button" id="subjectEditCancel" data-i18n="action.cancel">إلغاء</button>
-          <button class="btn" type="submit" id="subjectEditSubmit" data-i18n="action.save">حفظ</button>
-        </div>
-        <p class="message" id="subjectEditMessage" role="status" aria-live="polite"></p>
-      </form>
-    </dialog>
 
-    <section class="surface" aria-labelledby="subject-heading">
-      <h2 id="subject-heading" data-i18n="admin.newSubject">مادة جديدة</h2>
-      <p class="subtext" data-i18n="admin.subjectEditNote">تغيير الأسماء والوصف فقط؛ المرجع (slug) يبقى لأنه اسم مجلد التخزين.</p>
-      <form id="subjectForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="subjectCode" data-i18n="field.code">الرمز</label>
-            <input id="subjectCode" name="code" maxlength="20">
-          </div>
-          <div class="field">
-            <label for="subjectReference" data-i18n="field.reference">المرجع</label>
-            <input id="subjectReference" name="slug" maxlength="48" data-i18n-placeholder="admin.subjectReferenceHint" placeholder="مثال: math-1">
-          </div>
-          <div class="field">
-            <label for="subjectNameEn" data-i18n="field.nameEn">الاسم بالإنجليزية</label>
-            <input id="subjectNameEn" name="nameEn" maxlength="120" required>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn" type="submit" id="subjectSubmit" data-i18n="action.create">إنشاء</button>
-        </div>
-        <p class="message" id="subjectFormMessage" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-  </main>
+        <!-- id="subjectRows" is asserted by backend/scripts/page-smoke.js -->
+        <div id="subjectRows"></div>
+        <p class="message" id="subjectMessage" role="status" aria-live="polite" style="margin-block-start:var(--space-3)"></p>
+      </main>
+    </div>
 
-  <footer class="shell" id="appFooter"></footer>
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/subjects.js"></script>
 </body>
 </html>

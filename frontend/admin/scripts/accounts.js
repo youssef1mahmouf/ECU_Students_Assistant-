@@ -1,164 +1,156 @@
+﻿/**
+ * /admin/accounts/ - the account list and the per-account actions.
+ *
+ * Everything the buttons do goes through a guarded API call and then invalidates
+ * the account-scoped reads, so the table below always shows what the server now
+ * holds rather than what the browser hoped it changed. The server refuses the
+ * privileged actions regardless of what this page renders.
+ */
 import { bootAdmin } from '/shared/admin-layout.js';
-import { api } from '/shared/api.js';
-import { confirmDialog, escapeHtml, formatDate, mount, showMessage, toast } from '/shared/ui.js';
-import { t, serverText, onLanguageChange } from '/shared/i18n.js';
+import { api, invalidateApi } from '/shared/api.js';
+import { escapeHtml, formatDate, showMessage, setBusy, toast, confirmDialog } from '/shared/ui.js';
+import { t, serverText } from '/shared/i18n.js';
+import { permissions } from '/shared/session.js';
+import { createView } from '/shared/ui/view.js';
 
 const session = await bootAdmin({ active: 'accounts' });
-const GROUPS = new Set();
+if (!session) throw new Error('redirecting');
 
-function statusBadges(user) {
-  const badges = [];
-  if (user.protected) badges.push(`<span class="badge danger">${escapeHtml(t('state.protected'))}</span>`);
-  if (user.role !== 'user') badges.push(`<span class="badge">${escapeHtml(t(`role.${user.role}`))}</span>`);
-  if (user.active === false) badges.push(`<span class="badge danger">${escapeHtml(t('msg.disabled'))}</span>`);
-  else if (user.role === 'user' && !user.confirmed) badges.push(`<span class="badge warn">${escapeHtml(t('state.pending'))}</span>`);
-  else if (user.confirmed) badges.push(`<span class="badge ok">${escapeHtml(t('state.confirmed'))}</span>`);
-  return badges.join(' ') || `<span class="badge muted">${escapeHtml(t('state.active'))}</span>`;
+const caps = permissions();
+let accounts = [];
+
+const searchInput = document.getElementById('accountSearch');
+const statusSelect = document.getElementById('accountStatus');
+const toolbar = document.getElementById('accountsToolbar');
+
+function visible() {
+  const needle = (searchInput?.value || '').trim().toLowerCase();
+  const status = statusSelect?.value || '';
+  return accounts.filter((row) => {
+    if (status === 'staff' && row.role === 'user') return false;
+    if (status === 'pending' && row.confirmed) return false;
+    if (status === 'confirmed' && !row.confirmed) return false;
+    if (!needle) return true;
+    return `${row.name} ${row.email} ${row.group || ''}`.toLowerCase().includes(needle);
+  });
 }
 
-function groupCell(user) {
-  if (user.role !== 'user') return `<span dir="ltr">${escapeHtml(user.group || '-')}</span>`;
-  return `<select data-group-for="${escapeHtml(user.id)}" aria-label="${escapeHtml(t('field.group'))}">
-      <option value="">${escapeHtml(user.group || t('msg.noGroup'))}</option>
-      ${[...GROUPS].map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('')}
-    </select>`;
-}
+function render() {
+  const rows = visible();
+  const counter = document.getElementById('accountCount');
+  if (counter) counter.textContent = String(rows.length);
+  if (toolbar) toolbar.hidden = accounts.length === 0;
+  if (!rows.length) {
+    host.innerHTML = `<div class="state" role="status">
+        <span class="state__icon">
+          <svg viewBox="0 0 24 24" width="1.4rem" height="1.4rem" aria-hidden="true" focusable="false">
+            <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </span>
+        <p class="state__title">${escapeHtml(t('msg.searchNoResults'))}</p>
+        <p class="state__body">${escapeHtml(t('msg.searchNoResultsBody'))}</p>
+      </div>`;
+    return;
+  }
 
-function actionCell(user, isSuper) {
-  /* The protected owner account shows no Password / Disable / Delete buttons at all.
-     The server blocks those actions too, so this is display-only hardening. */
-  if (user.protected) return `<span class="badge danger">${escapeHtml(t('state.protected'))}</span>`;
-  return `<div class="row-actions">
-      ${
-        user.role === 'user' && !user.confirmed
-          ? `<button class="btn small" type="button" data-approve="${escapeHtml(user.id)}">${escapeHtml(t('action.approve'))}</button>`
-          : ''
-      }
-      <button class="btn secondary small" type="button" data-reset="${escapeHtml(user.id)}" data-name="${escapeHtml(user.name)}">${escapeHtml(t('action.resetPassword'))}</button>
-      <button class="btn ${user.active === false ? '' : 'secondary'} small" type="button"
-              data-active="${escapeHtml(user.id)}" data-next="${user.active === false ? 'true' : 'false'}">
-        ${user.active === false ? escapeHtml(t('action.enable')) : escapeHtml(t('action.disable'))}
-      </button>
-      ${
-        isSuper || user.role === 'user'
-          ? `<button class="btn danger small" type="button" data-delete="${escapeHtml(user.id)}" data-name="${escapeHtml(user.name)}">${escapeHtml(t('action.delete'))}</button>`
-          : ''
-      }
+  host.innerHTML = `<div class="table-wrap">
+      <table class="table table--responsive">
+        <caption class="visually-hidden">${escapeHtml(t('admin.accountList'))}</caption>
+        <thead>
+          <tr>
+            <th scope="col">${escapeHtml(t('field.name'))}</th>
+            <th scope="col">${escapeHtml(t('field.email'))}</th>
+            <th scope="col">${escapeHtml(t('field.group'))}</th>
+            <th scope="col">${escapeHtml(t('field.role'))}</th>
+            <th scope="col">${escapeHtml(t('field.status'))}</th>
+            <th scope="col">${escapeHtml(t('field.actions'))}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows
+            .map((row) => {
+              const canManage = row.role === 'user' || caps.isSuperAdmin;
+              const guarded = !canManage || row.protected;
+              return `<tr>
+              <th scope="row" data-label="${escapeHtml(t('field.name'))}">
+                <span class="table__primary">${escapeHtml(row.name)}</span>
+                <small class="table__sub">${escapeHtml(t('admin.joinedOn', { date: formatDate(row.createdAt) }))}</small>
+              </th>
+              <td data-label="${escapeHtml(t('field.email'))}" dir="ltr" class="break">${escapeHtml(row.email)}</td>
+              <td data-label="${escapeHtml(t('field.group'))}">${escapeHtml(row.group || '-')}</td>
+              <td data-label="${escapeHtml(t('field.role'))}"><span class="badge">${escapeHtml(t(`role.${row.role}`))}</span></td>
+              <td data-label="${escapeHtml(t('field.status'))}">
+                <span class="badge ${row.confirmed ? 'badge--success' : 'badge--warning'}">${
+                  escapeHtml(row.confirmed ? t('state.confirmed') : t('state.pending'))
+                }</span>
+              </td>
+              <td data-label="${escapeHtml(t('field.actions'))}">
+                ${
+                  guarded
+                    ? `<span class="tiny subtle">${escapeHtml(t('admin.managedByOwner'))}</span>`
+                    : `<div class="table__actions">
+                        ${
+                          row.confirmed
+                            ? ''
+                            : `<button class="btn btn--secondary btn--sm" type="button" data-approve="${escapeHtml(row.id)}">
+                                 ${escapeHtml(t('action.approve'))}</button>`
+                        }
+                        <button class="btn btn--secondary btn--sm" type="button" data-disable="${escapeHtml(row.id)}"
+                                data-next="${row.active === false ? 'true' : 'false'}">
+                          ${escapeHtml(row.active === false ? t('action.enable') : t('action.disable'))}</button>
+                        <button class="btn btn--danger btn--sm" type="button" data-delete-account="${escapeHtml(row.id)}"
+                                data-name="${escapeHtml(row.name)}">${escapeHtml(t('action.delete'))}</button>
+                      </div>`
+                }
+              </td>
+            </tr>`;
+            })
+            .join('')}
+        </tbody>
+      </table>
     </div>`;
 }
 
-async function loadAccounts() {
-  const data = await api.getQuiet('/api/admin/users');
-  const users = data?.users || [];
-  const isSuper = Boolean(session.permissions.isSuperAdmin);
+const view = createView('#accountRows', {
+  load: () => api.get('/api/admin/users'),
+  render: (data) => {
+    accounts = data.users || [];
+    return render();
+  },
+  isEmpty: (data) => !(data?.users || []).length,
+  empty: { icon: 'users', titleKey: 'admin.noAccounts', bodyKey: 'admin.noAccountsBody' },
+});
 
-  mount(
-    '#accountRows',
-    users.length
-      ? users
-          .map(
-            (user) => `<tr>
-          <th scope="row"><span>${escapeHtml(user.name)}</span>
-            <small class="row-sub">${escapeHtml(formatDate(user.lastLoginAt) || t('msg.neverSignedIn'))}</small></th>
-          <td dir="ltr">${escapeHtml(user.email)}</td>
-          <td>${groupCell(user)}</td>
-          <td>${statusBadges(user)}</td>
-          <td>${actionCell(user, isSuper)}</td>
-        </tr>`
-          )
-          .join('')
-      : `<tr><td colspan="5" class="empty">${escapeHtml(t('msg.empty'))}</td></tr>`
-  );
-}
+view.reload();
 
-async function patchUser(id, patch) {
+searchInput?.addEventListener('input', render);
+statusSelect?.addEventListener('change', render);
+
+document.getElementById('accountRows').addEventListener('click', async (event) => {
+  const button = event.target.closest('button');
+  if (!button) return;
   try {
-    await api.patch(`/api/admin/users/${encodeURIComponent(id)}`, patch);
-    toast(t('msg.updated'), 'success');
-    await loadAccounts();
-    return true;
-  } catch (error) {
-    showMessage('accountMessage', serverText(error.message), 'error');
-    return false;
-  }
-}
-
-if (!session) {
-  /* bootAdmin already redirected a visitor without admin rights. */
-} else {
-  const groups = await api.getQuiet('/api/admin/groups');
-  for (const group of groups?.groups || []) GROUPS.add(group.name);
-
-  const roleSelect = document.getElementById('createRole');
-  if (!session.permissions.isSuperAdmin) for (const option of roleSelect.options) if (option.value !== 'user') option.disabled = true;
-  document.getElementById('createGroup').innerHTML = [...GROUPS]
-    .map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
-    .join('');
-
-  await loadAccounts();
-
-  const rows = document.getElementById('accountRows');
-
-  rows.addEventListener('click', async (event) => {
-    const button = event.target.closest('button');
-    if (!button) return;
-
-    if (button.dataset.approve) return patchUser(button.dataset.approve, { confirmed: true });
-    if (button.dataset.active) return patchUser(button.dataset.active, { active: button.dataset.next === 'true' });
-
-    if (button.dataset.reset) {
-      const password = window.prompt(t('msg.promptNewPassword', { name: button.dataset.name }));
-      if (password === null) return;
-      try {
-        await api.post(`/api/admin/users/${encodeURIComponent(button.dataset.reset)}/password`, { password });
-        showMessage('accountMessage', t('msg.passwordSet'), 'success');
-        toast(t('msg.passwordSet'), 'success');
-      } catch (error) {
-        showMessage('accountMessage', serverText(error.message), 'error');
-      }
+    if (button.dataset.approve) {
+      await api.patch(`/api/admin/users/${encodeURIComponent(button.dataset.approve)}`, { confirmed: true });
+      toast(t('msg.accountApproved'), 'success');
+    } else if (button.dataset.disable) {
+      await api.patch(`/api/admin/users/${encodeURIComponent(button.dataset.disable)}`, {
+        active: button.dataset.next === 'true',
+      });
+      toast(t('msg.saved'), 'success');
+    } else if (button.dataset.deleteAccount) {
+      if (!confirmDialog(t('msg.confirmDelete', { name: button.dataset.name }))) return;
+      await api.del(`/api/admin/users/${encodeURIComponent(button.dataset.deleteAccount)}`);
+      toast(t('msg.deleted'), 'success');
+    } else {
       return;
     }
-
-    if (button.dataset.delete) {
-      if (!confirmDialog(t('msg.confirmDelete', { name: button.dataset.name }))) return;
-      try {
-        await api.del(`/api/admin/users/${encodeURIComponent(button.dataset.delete)}`);
-        toast(t('msg.accountDeleted'), 'success');
-        await loadAccounts();
-      } catch (error) {
-        showMessage('accountMessage', serverText(error.message), 'error');
-      }
-    }
-  });
-
-  rows.addEventListener('change', async (event) => {
-    const select = event.target.closest('[data-group-for]');
-    if (!select || !select.value) return;
-    await patchUser(select.dataset.groupFor, { group: select.value });
-  });
-
-  document.getElementById('createForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.target).entries());
-    try {
-      const result = await api.post('/api/admin/users', {
-        name: String(data.name || '').trim(),
-        email: String(data.email || '').trim().toLowerCase(),
-        password: data.password,
-        role: data.role,
-        ...(data.role === 'user' ? { group: data.group } : {}),
-      });
-      event.target.reset();
-      showMessage('createMessage', `${t('msg.accountCreated')} ${result.user.email}`, 'success');
-      toast(t('msg.accountCreated'), 'success');
-      await loadAccounts();
-    } catch (error) {
-      showMessage('createMessage', serverText(error.message), 'error');
-    }
-  });
-
-  /* Rebuild the table on a language switch: badges and buttons come from t(). */
-  onLanguageChange(() => {
-    void loadAccounts();
-  });
-}
+    /* The server changed account data: drop the account-scoped reads and re-read,
+       so the table and the bell agree without a manual reload. */
+    invalidateApi(['/api/admin/users', '/api/admin/overview', '/api/admin/activity']);
+    showMessage('accountMessage', '');
+    await view.reload();
+  } catch (error) {
+    showMessage('accountMessage', serverText(error.message, { status: error.status }), 'error');
+  }
+});

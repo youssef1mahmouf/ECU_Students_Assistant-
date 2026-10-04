@@ -3,42 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5fb">
   <meta name="robots" content="noindex">
-  <title>لوحة التحكم · بوابة المجموعات</title>
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
   <link rel="stylesheet" href="/shared/base.css">
-  <link rel="stylesheet" href="/admin/styles.css">
+  <link rel="stylesheet" href="/shared/components.css">
+  <link rel="stylesheet" href="/shared/shell.css">
+  <link rel="icon" href="/shared/favicon.svg" type="image/svg+xml">
+  <script src="/shared/theme-boot.js"></script>
 </head>
 <body data-page-title="title.dashboard">
   <a class="skip-link" href="#main" data-i18n="a11y.skip">تخطي إلى المحتوى</a>
-  <header class="topbar" id="appHeader"></header>
 
-  <main id="main" class="shell">
-    <section class="surface">
-      <p class="eyebrow" data-i18n="admin.dashboard">لوحة التحكم</p>
-      <h1 data-i18n="admin.overview">نظرة عامة</h1>
-      <p class="subtext" id="dashLead" data-i18n="admin.dashLead">أرقام لحظية من مخزن البيانات.</p>
-      <div class="stat-grid" id="statGrid">
-        <div class="stat"><strong>–</strong><span data-i18n="msg.loading">جار التحميل…</span></div>
-      </div>
-      <div class="role-row" id="roleBreakdown"></div>
-      <div class="actions">
-        <a class="btn" href="/admin/accounts/" data-i18n="admin.accounts">الحسابات</a>
-        <a class="btn secondary" href="/admin/groups/" data-i18n="admin.groups">المجموعات</a>
-        <a class="btn secondary" href="/admin/problems/" data-i18n="admin.problems">البلاغات</a>
-        <a class="btn secondary" href="/admin/activity/" data-i18n="admin.activity">سجل النشاط</a>
-        <a class="btn ghost" href="/?preview=visitor" target="_blank" rel="noopener" data-i18n="admin.viewPublic">عرض الصفحة العامة</a>
-      </div>
-      <p class="subtext" data-i18n="admin.viewPublicNote">تُفتح كما يراها الزائر تمامًا: بلا انتحال شخصية وبلا تجاوز صلاحيات.</p>
-    </section>
+  <div class="app">
+    <header class="topbar" id="appHeader"></header>
 
-    <section class="surface" aria-labelledby="charts-heading">
-      <h2 id="charts-heading" data-i18n="admin.activityCharts">مخططات النشاط</h2>
-      <p class="subtext" data-i18n="admin.chartNote">عدد الأحداث المسجّلة فعليًا في كل فترة، محسوبة من سجل النشاط.</p>
-      <div class="chart-grid" id="chartGrid"><p class="empty" data-i18n="msg.loading">جار التحميل…</p></div>
-    </section>
-  </main>
+    <div class="app__body">
+      <aside class="sidebar" id="appSidebar"></aside>
 
-  <footer class="shell" id="appFooter"></footer>
+      <main class="page" id="main">
+
+        <div class="page-head">
+          <div class="page-head__text">
+            <p class="eyebrow" data-i18n="admin.dashboard">لوحة التحكم</p>
+            <h1 data-i18n="admin.overview">نظرة عامة</h1>
+            <p class="lead">أرقام لحظية من مخزن البيانات.</p>
+          </div>
+        </div>
+
+        <section class="page__section" aria-labelledby="stats-heading">
+          <h2 class="visually-hidden" id="stats-heading" data-i18n="admin.overview">نظرة عامة</h2>
+          <!-- id="statGrid" is asserted by backend/scripts/page-smoke.js -->
+          <div id="statGrid"></div>
+          <div id="roleBreakdown" class="cluster"></div>
+        </section>
+
+        <section class="page__section" aria-labelledby="charts-heading">
+          <div class="section__head">
+            <h2 id="charts-heading" data-i18n="admin.activityCharts">مخططات النشاط</h2>
+            <span class="tiny subtle" data-i18n="admin.chartNote">محسوبة من سجل النشاط الفعلي.</span>
+          </div>
+          <div class="grid-auto" id="chartGrid"></div>
+        </section>
+
+        <section class="page__section" aria-labelledby="quick-heading">
+          <h2 id="quick-heading" data-i18n="admin.quickLinks">روابط سريعة</h2>
+          <div class="cluster">
+            <a class="btn btn--secondary" href="/admin/accounts/" data-i18n="admin.accounts">الحسابات</a>
+            <a class="btn btn--secondary" href="/admin/groups/" data-i18n="admin.groups">المجموعات</a>
+            <a class="btn btn--secondary" href="/admin/documents/" data-i18n="nav.documents">الملفات</a>
+            <a class="btn btn--secondary" href="/admin/problems/" data-i18n="admin.problems">البلاغات</a>
+            <a class="btn btn--secondary" href="/admin/security/" data-i18n="nav.security">الأمن</a>
+            <a class="btn btn--secondary" href="/admin/health/" data-i18n="nav.health">صحة النظام</a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer" id="appFooter"></footer>
+  </div>
+
   <script type="module" src="/admin/scripts/dashboard.js"></script>
 </body>
 </html>
